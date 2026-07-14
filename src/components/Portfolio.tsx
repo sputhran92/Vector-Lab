@@ -4,16 +4,8 @@ import { motion, AnimatePresence } from "motion/react";
 import { useNavigate } from "react-router-dom";
 
 // Local image imports for the provided project assets
-import flemingBefore from "../assets/images/fleming_before_1784026693496.jpg";
-import flemingAfter from "../assets/images/fleming_after_1784026705489.jpg";
-import mtbgoatBefore from "../assets/images/mtbgoat_before_1784026888084.jpg";
-import mtbgoatAfter from "../assets/images/mtbgoat_after_1784026900409.jpg";
-import lincolnBefore from "../assets/images/lincoln_before_1784028083157.jpg";
-import lincolnAfter from "../assets/images/lincoln_after_1784028072752.jpg";
-import margaritaBefore from "../assets/images/margarita_before_1784028105649.jpg";
-import margaritaAfter from "../assets/images/margarita_after_1784028094128.jpg";
-import bearBefore from "../assets/images/bear_before_1784028125534.jpg";
-import bearAfter from "../assets/images/bear_after_1784028115206.jpg";
+import brickFixersAfter from "../assets/images/brick_fixers_after.jpg";
+import maskCharacterAfter from "../assets/images/mask_character_after.jpg";
 
 interface GalleryItem {
   id: string;
@@ -37,94 +29,22 @@ export default function Portfolio() {
   // Simple, structured list of all provided images
   const galleryItems: GalleryItem[] = [
     {
-      id: "fleming-before",
-      src: flemingBefore,
-      title: "Baseball Logo (Before)",
-      type: "Raster Original",
-      project: "Fleming Island Baseball",
-      badgeColor: "bg-red-50 text-red-600 border-red-100",
-      description: "Low-res blurry athletic logo with pixelated contours."
-    },
-    {
-      id: "fleming-after",
-      src: flemingAfter,
-      title: "Baseball Logo (After)",
+      id: "brick-fixers-after",
+      src: brickFixersAfter,
+      title: "Brick Fixers Mascot Logo",
       type: "Traced Vector",
-      project: "Fleming Island Baseball",
+      project: "The Brick Fixers",
       badgeColor: "bg-green-50 text-green-700 border-green-100",
-      description: "Crisp hand-drawn vector paths with perfect circular curves."
+      description: "Clean, vibrant vector mascot logo with crisp linework and bold typography."
     },
     {
-      id: "mtbgoat-before",
-      src: mtbgoatBefore,
-      title: "MTBGOAT Badge (Before)",
-      type: "Raster Original",
-      project: "MTBGOAT Mountain Biking",
-      badgeColor: "bg-red-50 text-red-600 border-red-100",
-      description: "Out-of-focus raster graphic with distorted edges."
-    },
-    {
-      id: "mtbgoat-after",
-      src: mtbgoatAfter,
-      title: "MTBGOAT Badge (After)",
+      id: "mask-character-after",
+      src: maskCharacterAfter,
+      title: "Cartoon Character Vector",
       type: "Traced Vector",
-      project: "MTBGOAT Mountain Biking",
+      project: "Character Illustration",
       badgeColor: "bg-green-50 text-green-700 border-green-100",
-      description: "Symmetrical modern athletic brand with sharp typography."
-    },
-    {
-      id: "lincoln-before",
-      src: lincolnBefore,
-      title: "Lions Sports Mascot (Before)",
-      type: "Raster Original",
-      project: "Lincoln Lions Sports",
-      badgeColor: "bg-red-50 text-red-600 border-red-100",
-      description: "Heavily compressed and blurred lion team logo."
-    },
-    {
-      id: "lincoln-after",
-      src: lincolnAfter,
-      title: "Lions Sports Mascot (After)",
-      type: "Traced Vector",
-      project: "Lincoln Lions Sports",
-      badgeColor: "bg-green-50 text-green-700 border-green-100",
-      description: "Flawless multi-layered mascot with crisp gradients."
-    },
-    {
-      id: "margarita-before",
-      src: margaritaBefore,
-      title: "Sombrero Apparel (Before)",
-      type: "Raster Original",
-      project: "Margarita Apparel Design",
-      badgeColor: "bg-red-50 text-red-600 border-red-100",
-      description: "Hand-drawn apparel rough layout with bleeding scan lines."
-    },
-    {
-      id: "margarita-after",
-      src: margaritaAfter,
-      title: "Sombrero Apparel (After)",
-      type: "Traced Vector",
-      project: "Margarita Apparel Design",
-      badgeColor: "bg-green-50 text-green-700 border-green-100",
-      description: "Separated screenprint-ready solid vector layers."
-    },
-    {
-      id: "bear-before",
-      src: bearBefore,
-      title: "Grizzly Mascot (Before)",
-      type: "Raster Original",
-      project: "Bear Pride Athletic",
-      badgeColor: "bg-red-50 text-red-600 border-red-100",
-      description: "Collegiate mascot with color leaks and pixel blockiness."
-    },
-    {
-      id: "bear-after",
-      src: bearAfter,
-      title: "Grizzly Mascot (After)",
-      type: "Traced Vector",
-      project: "Bear Pride Athletic",
-      badgeColor: "bg-green-50 text-green-700 border-green-100",
-      description: "Reconstructed collegiate profiles with clean line weight."
+      description: "Fully traced cartoon character with clean, scalable vector lines."
     }
   ];
 
