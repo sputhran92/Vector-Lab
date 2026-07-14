@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Menu, X, Shield, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface NavbarProps {
   currentPage: string;
@@ -11,10 +12,15 @@ interface NavbarProps {
 export default function Navbar({ currentPage, onPageChange, onQuoteClick }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const isPortfolio = location.pathname === "/portfolio";
 
   const navLinks = [
     { name: "Home", id: "home" },
     { name: "Services", id: "services" },
+    { name: "Portfolio", id: "portfolio" },
     { name: "FAQ", id: "faq" },
     { name: "Blogs", id: "blogs" },
     { name: "Contact Us", id: "contact" },
@@ -32,15 +38,27 @@ export default function Navbar({ currentPage, onPageChange, onQuoteClick }: Navb
   const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
     e.preventDefault();
     setIsOpen(false);
-    onPageChange(id);
+    if (id === "portfolio") {
+      navigate("/portfolio");
+    } else {
+      navigate("/");
+      onPageChange(id);
+    }
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const isLinkActive = (id: string) => {
+    if (id === "portfolio") {
+      return isPortfolio;
+    }
+    return !isPortfolio && currentPage === id;
   };
 
   return (
     <header
       id="navbar"
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-        scrolled || currentPage !== "home"
+        scrolled || isPortfolio || currentPage !== "home"
           ? "bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-100 py-3"
           : "bg-transparent py-5"
       }`}
@@ -70,7 +88,7 @@ export default function Navbar({ currentPage, onPageChange, onQuoteClick }: Navb
                 href={`#${link.id}`}
                 onClick={(e) => handleLinkClick(e, link.id)}
                 className={`text-sm font-medium transition-colors hover:text-primary-blue ${
-                  currentPage === link.id
+                  isLinkActive(link.id)
                     ? "text-primary-blue font-bold border-b-2 border-primary-blue pb-1"
                     : "text-gray-600 pb-1"
                 }`}
@@ -124,7 +142,7 @@ export default function Navbar({ currentPage, onPageChange, onQuoteClick }: Navb
                   href={`#${link.id}`}
                   onClick={(e) => handleLinkClick(e, link.id)}
                   className={`block px-4 py-3 rounded-lg text-base font-medium transition-colors ${
-                    currentPage === link.id
+                    isLinkActive(link.id)
                       ? "bg-brand-bg-light text-primary-blue font-semibold"
                       : "text-gray-600 hover:bg-gray-50 hover:text-primary-blue"
                   }`}
