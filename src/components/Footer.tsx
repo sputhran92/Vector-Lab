@@ -1,5 +1,5 @@
 import React from "react";
-import { Shield, Mail, Phone, MapPin, ArrowUp } from "lucide-react";
+import { Shield, Mail, ArrowUp } from "lucide-react";
 
 interface FooterProps {
   onPageChange: (page: string) => void;
@@ -85,50 +85,48 @@ export default function Footer({ onPageChange, onServiceSelect }: FooterProps) {
             </ul>
           </div>
 
-          {/* Column 3: Service Anchors */}
+          {/* Column 3: Explore */}
           <div className="lg:col-span-3 space-y-4">
             <h4 className="font-extrabold text-brand-text-dark text-sm uppercase tracking-wider">
-              Our Services
+              Explore
             </h4>
             <ul className="space-y-2.5 text-sm">
-              {services.map((svc) => (
-                <li key={svc.name}>
-                  <a
-                    href="#contact"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      onServiceSelect(svc.name);
-                    }}
-                    className="hover:text-primary-blue transition-colors block"
-                  >
-                    {svc.label}
-                  </a>
-                </li>
-              ))}
+              <li>
+                <a href="#portfolio" onClick={(e) => handleLinkClick(e, "portfolio")} className="hover:text-primary-blue transition-colors block">
+                  Portfolio
+                </a>
+              </li>
+              <li>
+                <a href="#refund-policy" onClick={(e) => handleLinkClick(e, "refund-policy")} className="hover:text-primary-blue transition-colors block">
+                  Refund & Cancellation Policy
+                </a>
+              </li>
+              <li>
+                <a href="#terms-of-service" onClick={(e) => handleLinkClick(e, "terms-of-service")} className="hover:text-primary-blue transition-colors block">
+                  Terms of Service
+                </a>
+              </li>
+              <li>
+                <a href="#privacy-policy" onClick={(e) => handleLinkClick(e, "privacy-policy")} className="hover:text-primary-blue transition-colors block">
+                  Privacy Policy
+                </a>
+              </li>
             </ul>
           </div>
 
           {/* Column 4: Office Stats */}
           <div className="lg:col-span-2 space-y-4">
             <h4 className="font-extrabold text-brand-text-dark text-sm uppercase tracking-wider">
-              Headquarters
+              Contact
             </h4>
             <ul className="space-y-3.5 text-sm">
-              <li className="flex items-start gap-2">
-                <MapPin className="w-4 h-4 text-primary-blue flex-shrink-0 mt-0.5" />
-                <span className="text-xs">
-                  Vector Lab Inc.<br />
-                  100 Pine Street, Floor 14<br />
-                  San Francisco, CA 94111
-                </span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Phone className="w-4 h-4 text-primary-blue flex-shrink-0" />
-                <span className="text-xs">+1 (415) 555-0198</span>
-              </li>
               <li className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-primary-blue flex-shrink-0" />
-                <span className="text-xs">quotes@vectorlab.com</span>
+                <span className="text-sm">
+                  <a href="mailto:info@vectortracelab.com" className="hover:text-primary-blue transition-colors text-sm" style={{ fontSize: "14px" }}>
+                    info@vectortracelab.com
+                  </a>
+                </span>
               </li>
             </ul>
           </div>
@@ -142,8 +140,6 @@ export default function Footer({ onPageChange, onServiceSelect }: FooterProps) {
           </p>
 
           <div className="flex items-center gap-6 text-xs text-gray-400">
-            <a href="#" className="hover:text-primary-blue transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-primary-blue transition-colors">Terms of Service</a>
             
             {/* Scroll back to top button */}
             <button

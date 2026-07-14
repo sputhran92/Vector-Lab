@@ -5,6 +5,7 @@ import Hero from "./components/Hero";
 import Services from "./components/Services";
 import Features from "./components/Features";
 import Process from "./components/Process";
+import FeaturedPortfolio from "./components/FeaturedPortfolio";
 import Portfolio from "./components/Portfolio";
 import Pricing from "./components/Pricing";
 import Testimonials from "./components/Testimonials";
@@ -89,6 +90,9 @@ function AppContent() {
 
                   {/* 5. Process / How It Works */}
                   <Process />
+
+                  {/* Curated Featured Portfolio Section */}
+                  <FeaturedPortfolio onPortfolioClick={handlePortfolioClick} />
 
                   {/* 7. Pricing Section */}
                   <Pricing onPlanSelect={handlePlanSelect} />

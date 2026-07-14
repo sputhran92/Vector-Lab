@@ -10,7 +10,7 @@ export default function Pricing({ onPlanSelect }: PricingProps) {
     {
       id: "plan-basic",
       name: "Basic Vector Tracing",
-      price: "$19",
+      price: "$20",
       period: "per image",
       turnaround: "Delivered in 24 Hours",
       description: "Perfect for simple geometric shapes, flat-color logos, clean modern fonts, or basic icons.",
@@ -27,7 +27,7 @@ export default function Pricing({ onPlanSelect }: PricingProps) {
     {
       id: "plan-standard",
       name: "Standard Graphic Vector",
-      price: "$39",
+      price: "$30",
       period: "per image",
       turnaround: "Delivered in 12-24 Hours",
       description: "Ideal for detailed corporate logos, multi-color cartoon characters, complex mascot emblems, or custom typography.",
@@ -45,7 +45,7 @@ export default function Pricing({ onPlanSelect }: PricingProps) {
     {
       id: "plan-premium",
       name: "Premium / Technical Drawing",
-      price: "$79",
+      price: "$45",
       period: "per image",
       turnaround: "Delivered in 24-48 Hours",
       description: "Best for highly detailed pencil sketches, faded blueprints, historical maps, or complex mechanical diagrams.",

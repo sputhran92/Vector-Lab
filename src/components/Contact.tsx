@@ -143,7 +143,7 @@ export default function Contact({ prefilledService, prefilledPlan }: ContactProp
                   <div>
                     <h4 className="font-extrabold text-brand-text-dark text-sm">Direct Support Email</h4>
                     <p className="text-xs sm:text-sm text-primary-blue hover:underline">
-                      <a href="mailto:quotes@vectorlab.com">quotes@vectorlab.com</a>
+                      <a href="mailto:info@vectortracelab.com">info@vectortracelab.com</a>
                     </p>
                   </div>
                 </div>
@@ -154,7 +154,7 @@ export default function Contact({ prefilledService, prefilledPlan }: ContactProp
                   </div>
                   <div>
                     <h4 className="font-extrabold text-brand-text-dark text-sm">Average Quote Response Time</h4>
-                    <p className="text-xs sm:text-sm text-brand-text-body">10 to 20 Minutes (Mon - Sun, 24/7)</p>
+                    <p className="text-xs sm:text-sm text-brand-text-body">10-20 Minutes (Mon - Fri US Timings).</p>
                   </div>
                 </div>
 

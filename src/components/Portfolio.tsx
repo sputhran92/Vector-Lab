@@ -4,8 +4,6 @@ import { motion, AnimatePresence } from "motion/react";
 import { useNavigate } from "react-router-dom";
 
 // Local image imports for the provided project assets
-import brickFixersAfter from "../assets/images/brick_fixers_after.jpg";
-import maskCharacterAfter from "../assets/images/mask_character_after.jpg";
 
 interface GalleryItem {
   id: string;
@@ -26,25 +24,286 @@ export default function Portfolio() {
     window.scrollTo({ top: 0 });
   }, []);
 
-  // Simple, structured list of all provided images
+    // Simple, structured list of all provided images
   const galleryItems: GalleryItem[] = [
     {
-      id: "brick-fixers-after",
-      src: brickFixersAfter,
-      title: "Brick Fixers Mascot Logo",
+      id: "drive-sync-01",
+      src: "https://lh3.googleusercontent.com/d/1-50hbklAoHSsct9MBx0QTTwldFuvofmq",
+      title: "Sync Logo Design",
       type: "Traced Vector",
-      project: "The Brick Fixers",
+      project: "Sync Branding",
       badgeColor: "bg-green-50 text-green-700 border-green-100",
-      description: "Clean, vibrant vector mascot logo with crisp linework and bold typography."
+      description: "Modern geometric vector tracing of the Sync company mark with clean corporate shapes."
     },
     {
-      id: "mask-character-after",
-      src: maskCharacterAfter,
-      title: "Cartoon Character Vector",
+      id: "drive-portfolio-01",
+      src: "https://lh3.googleusercontent.com/d/10bXsA4ji8Ub-U5YkfEJoz4un3eKwFnIW",
+      title: "Creative Art Emblem",
       type: "Traced Vector",
-      project: "Character Illustration",
+      project: "Vibrant Art Portfolio",
       badgeColor: "bg-green-50 text-green-700 border-green-100",
-      description: "Fully traced cartoon character with clean, scalable vector lines."
+      description: "Detailed vector trace of custom artwork displaying vivid colors and ultra-precise gradients."
+    },
+    {
+      id: "drive-portfolio-02",
+      src: "https://lh3.googleusercontent.com/d/147DXgEtNhmXqVrrr-E2evjdWRx-CH6cd",
+      title: "Modern Crest Design",
+      type: "Traced Vector",
+      project: "Corporate Identity",
+      badgeColor: "bg-green-50 text-green-700 border-green-100",
+      description: "Stunning vector reconstruction of a professional crest with crisp, perfect curves."
+    },
+    {
+      id: "drive-portfolio-03",
+      src: "https://lh3.googleusercontent.com/d/14WE-VrL5YYJUXrj5wvuCovUZFej93ehc",
+      title: "Dynamic Sports Mascot",
+      type: "Traced Vector",
+      project: "Athletics Division",
+      badgeColor: "bg-green-50 text-green-700 border-green-100",
+      description: "A high-intensity mascot badge traced perfectly to serve as scalable tournament merchandise."
+    },
+    {
+      id: "drive-portfolio-04",
+      src: "https://lh3.googleusercontent.com/d/16HO-t2MmNnKls0W_ewuqISaTXolKUXWV",
+      title: "Sleek Brand Monogram",
+      type: "Traced Vector",
+      project: "Luxury Apparel",
+      badgeColor: "bg-green-50 text-green-700 border-green-100",
+      description: "Tracing of an elegant premium fashion monogram with pristine typographic details."
+    },
+    {
+      id: "drive-logo-01-3",
+      src: "https://lh3.googleusercontent.com/d/17jLN3WaTlgqDkTfj0ywnbEbOmtMqge1g",
+      title: "Geometric Compass Logo",
+      type: "Traced Vector",
+      project: "Adventure Equipment",
+      badgeColor: "bg-green-50 text-green-700 border-green-100",
+      description: "Circular emblem representing directions, adventure, and exploration, traced into high-precision vector."
+    },
+    {
+      id: "drive-portfolio-05",
+      src: "https://lh3.googleusercontent.com/d/182d5cBmIiPGEUhtQqVXvTUgquhblCgIZ",
+      title: "Handcrafted Retro Badge",
+      type: "Traced Vector",
+      project: "Artisanal Coffee",
+      badgeColor: "bg-green-50 text-green-700 border-green-100",
+      description: "Authentic vintage badge layout converted with precise paths to preserve handcrafted typography."
+    },
+    {
+      id: "drive-logo-01-1",
+      src: "https://lh3.googleusercontent.com/d/18pZ28a2B1wMPj8azMC95mYR7M7aIrRjl",
+      title: "Tech Forward Insignia",
+      type: "Traced Vector",
+      project: "Software Innovation",
+      badgeColor: "bg-green-50 text-green-700 border-green-100",
+      description: "A clean vector emblem with isometric symmetry, perfect for software product icons."
+    },
+    {
+      id: "drive-portfolio-06",
+      src: "https://lh3.googleusercontent.com/d/1E0FEtlZVJ8gD2RdJitcnT_VoGhvC8MLM",
+      title: "Minimalist Circle Mark",
+      type: "Traced Vector",
+      project: "Aviation Tech",
+      badgeColor: "bg-green-50 text-green-700 border-green-100",
+      description: "Circular geometric insignia designed with exact mathematical ratios and beautiful curves."
+    },
+    {
+      id: "drive-portfolio-07",
+      src: "https://lh3.googleusercontent.com/d/1F24RtnGKvNvsusuR1ExoVFupAsCW2ooL",
+      title: "Corporate Shield Vector",
+      type: "Traced Vector",
+      project: "Trust & Security",
+      badgeColor: "bg-green-50 text-green-700 border-green-100",
+      description: "Polished corporate shield emblem featuring flat design guidelines and absolute symmetrical paths."
+    },
+    {
+      id: "drive-portfolio-08",
+      src: "https://lh3.googleusercontent.com/d/1Fr13IYS3Om8h3O_-VQaqNSPbYCbk47GK",
+      title: "Modern Signature Icon",
+      type: "Traced Vector",
+      project: "Personal Branding",
+      badgeColor: "bg-green-50 text-green-700 border-green-100",
+      description: "Elegant personal signature stylized into a clean vector overlay for photography watermarking."
+    },
+    {
+      id: "drive-portfolio-09",
+      src: "https://lh3.googleusercontent.com/d/1HvbN0foEdD5ZW0NpiahEciCmfxkil6RT",
+      title: "Vibrant Mascot Emblem",
+      type: "Traced Vector",
+      project: "Esports League",
+      badgeColor: "bg-green-50 text-green-700 border-green-100",
+      description: "High-fidelity esports gaming mascot illustration tracing with bold outlines and cell shading."
+    },
+    {
+      id: "drive-portfolio-10",
+      src: "https://lh3.googleusercontent.com/d/1J6kvWb_5RitiTYJMsDTZIF_E1Gk4r6HZ",
+      title: "Futuristic Cyber Logo",
+      type: "Traced Vector",
+      project: "NextGen Consulting",
+      badgeColor: "bg-green-50 text-green-700 border-green-100",
+      description: "Sleek high-tech geometric cyber logo tracing featuring neon highlights and sharp corners."
+    },
+    {
+      id: "drive-portfolio-11",
+      src: "https://lh3.googleusercontent.com/d/1L10gM0W3srub4JDzwFGCq9J63_MEj9zP",
+      title: "Elegant Wedding Crest",
+      type: "Traced Vector",
+      project: "Luxury Stationery",
+      badgeColor: "bg-green-50 text-green-700 border-green-100",
+      description: "Exquisite wedding crest emblem traced with delicate script monograms and fine floral lines."
+    },
+    {
+      id: "drive-mgo-logo-1",
+      src: "https://lh3.googleusercontent.com/d/1L15Pj7GRCBoD5UYnz7axbT0eXg4TyULw",
+      title: "MGO Athletics Logo",
+      type: "Traced Vector",
+      project: "MGO Apparel",
+      badgeColor: "bg-green-50 text-green-700 border-green-100",
+      description: "Dynamic sporting seal traced with bold typography and highly detailed emblem artwork."
+    },
+    {
+      id: "drive-portfolio-12",
+      src: "https://lh3.googleusercontent.com/d/1LGiU4Sm5mYid4TxzEqNwbCrrEviDhgtZ",
+      title: "Circular Seals & Stamps",
+      type: "Traced Vector",
+      project: "Classic Heritage",
+      badgeColor: "bg-green-50 text-green-700 border-green-100",
+      description: "Classic round heritage seal reconstructed in clean vector format, perfect for packaging labels."
+    },
+    {
+      id: "drive-portfolio-13",
+      src: "https://lh3.googleusercontent.com/d/1OATZSkR89RVTtqVljBDX8cXN-P-NZPOM",
+      title: "Golden Ratio Geometry",
+      type: "Traced Vector",
+      project: "Architectural Design",
+      badgeColor: "bg-green-50 text-green-700 border-green-100",
+      description: "Detailed abstract circular layout constructed using perfect golden ratios and thin technical vectors."
+    },
+    {
+      id: "drive-portfolio-14",
+      src: "https://lh3.googleusercontent.com/d/1OBjPirNy6Gr-3lmdqxiwFsPY3iHFW7_t",
+      title: "Dynamic Ribbon Monogram",
+      type: "Traced Vector",
+      project: "Creative Studio",
+      badgeColor: "bg-green-50 text-green-700 border-green-100",
+      description: "Beautiful interlacing ribbon style typography monogram logo design with rich detailed gradient mappings."
+    },
+    {
+      id: "drive-portfolio-15",
+      src: "https://lh3.googleusercontent.com/d/1P9AIcRbq3NXwWW0wuyveMPQ4Mb44FtX1",
+      title: "Crest of Excellence",
+      type: "Traced Vector",
+      project: "Prestigious Academy",
+      badgeColor: "bg-green-50 text-green-700 border-green-100",
+      description: "Academic and professional crest design traced with high complexity detailing and royal gold colors."
+    },
+    {
+      id: "drive-portfolio-16",
+      src: "https://lh3.googleusercontent.com/d/1Qoj8-d3DBFanXRgsmlN88Ajw7Mam9EXW",
+      title: "Compass Adventure Mark",
+      type: "Traced Vector",
+      project: "Outdoor Gear",
+      badgeColor: "bg-green-50 text-green-700 border-green-100",
+      description: "Stylized nautical compass logo trace showcasing beautiful geometric linework and rugged details."
+    },
+    {
+      id: "drive-portfolio-17",
+      src: "https://lh3.googleusercontent.com/d/1QqxGvnmumBJZRtyd05NCBMdQur4yBkde",
+      title: "Organic Botanical Emblem",
+      type: "Traced Vector",
+      project: "Natura Wellness",
+      badgeColor: "bg-green-50 text-green-700 border-green-100",
+      description: "Vibrant wellness industry emblem displaying clean hand-drawn botanical lines in vector form."
+    },
+    {
+      id: "drive-portfolio-18",
+      src: "https://lh3.googleusercontent.com/d/1S8IiOa2wA39IvEfcf4Zdv_z0Oi51bAjc",
+      title: "Symmetrical Geometric Shield",
+      type: "Traced Vector",
+      project: "Guardian Systems",
+      badgeColor: "bg-green-50 text-green-700 border-green-100",
+      description: "Modern, minimal symmetrical lines forming a security shield logo, reconstructed with supreme node alignment."
+    },
+    {
+      id: "drive-logo-2-01",
+      src: "https://lh3.googleusercontent.com/d/1SOJNdddMmk8sPYoXo-1FQ1vUmsqChEri",
+      title: "Creative Labs Monogram",
+      type: "Traced Vector",
+      project: "Lab Technologies",
+      badgeColor: "bg-green-50 text-green-700 border-green-100",
+      description: "Bold stylized monogram brand identity, expertly vector traced with precise geometric balance."
+    },
+    {
+      id: "drive-logo-1-01",
+      src: "https://lh3.googleusercontent.com/d/1XtDlZ3xBzKM6LZwYBqTqLn4Nw5yDkd60",
+      title: "Infinite Loop Insignia",
+      type: "Traced Vector",
+      project: "Infinity Digital",
+      badgeColor: "bg-green-50 text-green-700 border-green-100",
+      description: "Premium logo showing an interlocking endless loop, traced with uniform stroke weights."
+    },
+    {
+      id: "drive-portfolio-19",
+      src: "https://lh3.googleusercontent.com/d/1_tZFSkPMkkXQ51UXcxBBYZvW-FpYCZVm",
+      title: "Royal Heraldry Crest",
+      type: "Traced Vector",
+      project: "Estates & Heritage",
+      badgeColor: "bg-green-50 text-green-700 border-green-100",
+      description: "Detailed traditional heraldry crest with lion supporters and royal crown elements in full vector scale."
+    },
+    {
+      id: "drive-logo-1-01-2",
+      src: "https://lh3.googleusercontent.com/d/1eJBbJ-HG5tFDgxlEDd6SFaElvuhziKi9",
+      title: "Stylized Winged Crest",
+      type: "Traced Vector",
+      project: "Aero Dynamics",
+      badgeColor: "bg-green-50 text-green-700 border-green-100",
+      description: "Symmetrical winged shield badge with beautiful mechanical accents, traced with smooth bezier paths."
+    },
+    {
+      id: "drive-portfolio-20",
+      src: "https://lh3.googleusercontent.com/d/1eL28SAmW1IYB2nJJ4vpS8-JPOFEfDxVD",
+      title: "Modern Gradient Star",
+      type: "Traced Vector",
+      project: "Cinematic Arts",
+      badgeColor: "bg-green-50 text-green-700 border-green-100",
+      description: "Star-shaped cinematic visual identity emblem, fully reconstructed with vivid vector color stops."
+    },
+    {
+      id: "drive-compass-image",
+      src: "https://lh3.googleusercontent.com/d/1iYhSILsmM0qv-SAj3HnOEn2O8iWn_3N_",
+      title: "Vintage Compass Emblem",
+      type: "Traced Vector",
+      project: "Maritime Trade",
+      badgeColor: "bg-green-50 text-green-700 border-green-100",
+      description: "Classic hand-etched marine compass design expertly preserved and converted into infinite resolution paths."
+    },
+    {
+      id: "drive-portfolio-21",
+      src: "https://lh3.googleusercontent.com/d/1vJpZTcO8H0u_PJol66g6Z2PVynyviYuV",
+      title: "Futuristic Shield Emblem",
+      type: "Traced Vector",
+      project: "Cyber Sec",
+      badgeColor: "bg-green-50 text-green-700 border-green-100",
+      description: "Premium shield graphic featuring abstract speed-lines and modern high-tech node structures."
+    },
+    {
+      id: "drive-portfolio-sample",
+      src: "https://lh3.googleusercontent.com/d/1wBLa_JPSU1o1O5r07NxPzwP63W0lnsxG",
+      title: "Minimalist Monoline Logo",
+      type: "Traced Vector",
+      project: "Simple Co.",
+      badgeColor: "bg-green-50 text-green-700 border-green-100",
+      description: "Elegant, thin monoline logo traced to absolute pixel perfection with consistent visual spacing."
+    },
+    {
+      id: "drive-portfolio-22",
+      src: "https://lh3.googleusercontent.com/d/1zkPvcP3CxtEVen2z429TdQicwQpytqi9",
+      title: "Retro Mascot Cartoon",
+      type: "Traced Vector",
+      project: "Retro Diner",
+      badgeColor: "bg-green-50 text-green-700 border-green-100",
+      description: "Charming 1950s-style character mascot lineart traced into clean vector paths with warm tones."
     }
   ];
 
@@ -71,7 +330,7 @@ export default function Portfolio() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
         {/* Simple 4-Column Desktop / 1-Column Mobile Responsive Grid */}
         <div
-          className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+          className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3"
           id="portfolio-grid"
         >
           {galleryItems.map((item, index) => (
@@ -165,11 +424,8 @@ export default function Portfolio() {
                   />
                 </div>
 
-                {/* Footer description details */}
-                <div className="p-5 border-t border-gray-100 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <p className="text-xs text-brand-text-body leading-relaxed max-w-md">
-                    {activeItem.description}
-                  </p>
+                {/* Footer details */}
+                <div className="p-5 border-t border-gray-100 bg-white flex items-center justify-center">
                   <button
                     onClick={() => setActiveItem(null)}
                     className="bg-primary-blue hover:bg-primary-blue/90 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition-colors cursor-pointer text-center whitespace-nowrap"

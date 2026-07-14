@@ -115,7 +115,7 @@ export default function Features() {
           </div>
 
           <div className="flex flex-wrap gap-3 justify-center">
-            {["AI", "EPS", "SVG", "PDF", "DXF", "CDR"].map((fmt) => (
+            {["AI", "EPS", "SVG", "PDF", "PNG", "JPG"].map((fmt) => (
               <span
                 key={fmt}
                 className="px-3.5 py-1.5 bg-white text-brand-text-dark text-xs font-extrabold rounded-lg border border-gray-200 shadow-xs tracking-wider"

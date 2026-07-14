@@ -103,19 +103,7 @@ export default function Process() {
           </div>
         </div>
 
-        {/* CTA prompt */}
-        <div className="mt-16 text-center" id="process-cta-prompt">
-          <p className="text-sm font-medium text-brand-text-body mb-3">
-            Got an urgent file that needs to be vectorized right away?
-          </p>
-          <a
-            href="#contact"
-            className="inline-flex items-center gap-2 text-sm font-extrabold text-primary-blue hover:text-accent-blue hover:underline cursor-pointer"
-          >
-            Start uploading now
-            <ChevronRight className="w-4 h-4" />
-          </a>
-        </div>
+
 
       </div>
     </section>

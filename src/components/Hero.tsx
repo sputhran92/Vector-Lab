@@ -10,6 +10,19 @@ interface HeroProps {
 export default function Hero({ onQuoteClick, onPortfolioClick }: HeroProps) {
   const [sliderPosition, setSliderPosition] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
+  const [containerWidth, setContainerWidth] = useState(384);
+  const sliderRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (!sliderRef.current) return;
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setContainerWidth(entry.contentRect.width);
+      }
+    });
+    observer.observe(sliderRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   const handleMove = (clientX: number, rect: DOMRect) => {
     const x = clientX - rect.left;
@@ -96,7 +109,7 @@ export default function Hero({ onQuoteClick, onPortfolioClick }: HeroProps) {
                 <div className="bg-primary-blue/10 text-primary-blue p-1 rounded-full">
                   <Check className="w-3.5 h-3.5 stroke-[3]" />
                 </div>
-                Fast 12-24h Delivery
+                4-8 Hrs Delivery
               </div>
               <div className="flex items-center gap-2 text-sm text-brand-text-dark font-medium">
                 <div className="bg-primary-blue/10 text-primary-blue p-1 rounded-full">
@@ -108,7 +121,7 @@ export default function Hero({ onQuoteClick, onPortfolioClick }: HeroProps) {
                 <div className="bg-primary-blue/10 text-primary-blue p-1 rounded-full">
                   <Check className="w-3.5 h-3.5 stroke-[3]" />
                 </div>
-                100% Accuracy Guarantee
+                24/7 Customer Support Available
               </div>
             </motion.div>
 
@@ -147,6 +160,7 @@ export default function Hero({ onQuoteClick, onPortfolioClick }: HeroProps) {
               className="w-full max-w-md bg-brand-bg-light p-4 rounded-2xl border border-gray-100 shadow-xl"
             >
               <div
+                ref={sliderRef}
                 className="relative h-80 w-full rounded-xl overflow-hidden select-none cursor-ew-resize bg-gray-200 border border-gray-300"
                 onMouseMove={handleMouseMove}
                 onTouchMove={handleTouchMove}
@@ -155,46 +169,39 @@ export default function Hero({ onQuoteClick, onPortfolioClick }: HeroProps) {
                 onMouseLeave={() => setIsDragging(false)}
                 id="before-after-slider-widget"
               >
-                {/* Raster (Before) - Background Image */}
-                <div className="absolute inset-0 w-full h-full bg-[#EBF1FA] flex flex-col items-center justify-center text-center p-6 filter blur-[0.7px]">
-                  {/* Rasterized pixelation mesh overlay */}
-                  <div className="absolute inset-0 bg-radial-mesh opacity-[0.4] mix-blend-color-burn" />
+                {/* Vector (After) - Background Image */}
+                <div className="absolute inset-0 w-full h-full">
+                  <div className="absolute inset-0 bg-grid-pattern opacity-[0.03] z-10 pointer-events-none" />
                   
-                  {/* Pixelated simulated icon */}
-                  <div className="w-32 h-32 text-gray-400 stroke-gray-300 relative flex items-center justify-center filter blur-[1.8px] opacity-75">
-                    <svg viewBox="0 0 100 100" className="w-full h-full fill-none stroke-[#1E5FBF]/70" strokeWidth="8">
-                      <polygon points="50,15 90,85 10,85" />
-                      <circle cx="50" cy="55" r="18" />
-                    </svg>
-                  </div>
-                  <div className="mt-4 font-mono text-xs font-bold bg-red-100 text-red-600 px-2 py-1 rounded">
-                    RASTER: Blurry, Jagged Pixels
-                  </div>
+                  <img
+                    src="https://lh3.googleusercontent.com/d/1nl8gIAkK57TZtStXX0qgypiBevdbQ4vv"
+                    alt="Pristine vector trace"
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-cover block"
+                  />
                 </div>
 
-                {/* Vector (After) - Overlaid Absolute Image */}
+                {/* Raster (Before) - Overlaid Absolute Image */}
                 <div
-                  className="absolute inset-y-0 left-0 h-full overflow-hidden bg-brand-bg-light border-r-2 border-primary-blue/80"
+                  className="absolute inset-y-0 left-0 h-full overflow-hidden border-r-2 border-primary-blue/80 z-10"
                   style={{ width: `${sliderPosition}%` }}
                 >
-                  <div className="absolute inset-y-0 left-0 w-80 h-full bg-white flex flex-col items-center justify-center text-center p-6" style={{ width: "100%" }}>
-                    <div className="absolute inset-0 bg-grid-pattern opacity-[0.04]" />
-                    {/* Clean SVG Vector Icon */}
-                    <div className="w-32 h-32 relative flex items-center justify-center">
-                      <svg viewBox="0 0 100 100" className="w-full h-full fill-none stroke-primary-blue drop-shadow-sm" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round">
-                        <polygon points="50,15 90,85 10,85" />
-                        <circle cx="50" cy="55" r="18" className="stroke-accent-blue" />
-                      </svg>
-                    </div>
-                    <div className="mt-4 font-mono text-xs font-bold bg-green-100 text-green-700 px-2 py-1 rounded">
-                      VECTOR: 100% Sharp & Scalable
-                    </div>
+                  <div className="absolute inset-y-0 left-0 h-full filter blur-[0.5px]" style={{ width: `${containerWidth}px` }}>
+                    {/* Rasterized pixelation mesh overlay */}
+                    <div className="absolute inset-0 bg-radial-mesh opacity-[0.35] mix-blend-color-burn z-10 pointer-events-none" />
+                    <img
+                      src="https://lh3.googleusercontent.com/d/1nl8gIAkK57TZtStXX0qgypiBevdbQ4vv"
+                      alt="Rasterized original"
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-cover block filter blur-[2px] brightness-[0.98]"
+                      style={{ imageRendering: "pixelated" }}
+                    />
                   </div>
                 </div>
 
                 {/* Slider Handle Bar */}
                 <div
-                  className="absolute top-0 bottom-0 pointer-events-none"
+                  className="absolute top-0 bottom-0 pointer-events-none z-20"
                   style={{ left: `calc(${sliderPosition}% - 1px)` }}
                 >
                   <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-primary-blue hover:bg-primary-blue/90 text-white flex items-center justify-center shadow-lg cursor-pointer border-2 border-white select-none pointer-events-auto">
@@ -203,14 +210,6 @@ export default function Hero({ onQuoteClick, onPortfolioClick }: HeroProps) {
                       <span className="text-[10px] font-bold">▶</span>
                     </div>
                   </div>
-                </div>
-
-                {/* Badges */}
-                <div className="absolute top-3 left-3 bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow">
-                  Before
-                </div>
-                <div className="absolute top-3 right-3 bg-green-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow">
-                  After
                 </div>
               </div>
 
