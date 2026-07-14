@@ -2,11 +2,11 @@
 @import "tailwindcss";
 
 :root {
-  --primary-blue: #1E5FBF;
-  --accent-blue: #4A90E2;
-  --brand-bg-light: #F5F8FC;
-  --brand-text-dark: #1A2332;
-  --brand-text-body: #4A5568;
+  --primary-blue: #6366F1;
+  --accent-blue: #A5B4FC;
+  --brand-bg-light: #EEF2FF;
+  --brand-text-dark: #1E1B4B;
+  --brand-text-body: #312E81;
 }
 
 @theme {

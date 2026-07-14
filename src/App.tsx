@@ -1,5 +1,4 @@
 import { useState } from "react";
-import DesignSelector from "./components/DesignSelector";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import Services from "./components/Services";
@@ -67,9 +66,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-white font-sans text-brand-text-body antialiased selection:bg-primary-blue/10 selection:text-primary-blue">
-      {/* Design Preset Selector */}
-      <DesignSelector />
-
       {/* 1. Navbar */}
       <Navbar
         currentPage={currentPage}
