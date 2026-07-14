@@ -1,0 +1,6 @@
+{
+  "name": "Vector Lab",
+  "description": "Professional vector tracing and logo recreation business landing page",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
