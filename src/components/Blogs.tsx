@@ -166,32 +166,13 @@ export default function Blogs() {
                 <div className="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-500 group" id="featured-post-card">
                   <div className="grid grid-cols-1 lg:grid-cols-12">
                     {/* Left Column: Cover Pattern */}
-                    <div className="lg:col-span-5 bg-slate-900 relative min-h-[250px] lg:min-h-[380px] flex items-center justify-center p-8 overflow-hidden">
+                    <div className="lg:col-span-5 bg-gray-100 relative min-h-[250px] lg:min-h-[380px] flex items-center justify-center overflow-hidden">
                       <img 
                         src={featuredBlog.heroImage} 
                         alt={featuredBlog.title} 
-                        className="absolute inset-0 w-full h-full object-cover z-0 group-hover:scale-105 transition-transform duration-700 opacity-60"
+                        className="absolute inset-0 w-full h-full object-cover z-0 group-hover:scale-105 transition-transform duration-700"
                         referrerPolicy="no-referrer"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-tr from-slate-950 via-slate-900/50 to-slate-950/25 z-0" />
-                      
-                      {/* Interactive Abstract bezier lines behind */}
-                      <svg className="absolute inset-0 w-full h-full opacity-35 text-primary-blue z-0" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="0.5">
-                        <path d="M0,50 C30,20 70,80 100,50" />
-                        <path d="M0,30 C40,90 60,10 100,70" strokeDasharray="3" />
-                        <circle cx="50" cy="50" r="2" fill="currentColor" />
-                      </svg>
-
-                      {/* Content badge and title inside graphic */}
-                      <div className="relative z-10 text-center space-y-4">
-                        <span className="bg-primary-blue/30 backdrop-blur-md text-white border border-white/20 text-[10px] font-bold uppercase tracking-widest px-3.5 py-1 rounded-full shadow-md">
-                          Featured Blueprint
-                        </span>
-                        <div className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 mx-auto flex items-center justify-center text-white shadow-lg">
-                          <Compass className="w-8 h-8 text-primary-blue animate-spin-slow" />
-                        </div>
-                        <p className="text-white/80 text-[11px] font-mono tracking-wider">VECTOR TRACE LAB RESEARCH</p>
-                      </div>
                     </div>
 
                     {/* Right Column: Editorial Details */}
