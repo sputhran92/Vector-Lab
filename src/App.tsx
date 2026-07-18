@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
@@ -21,6 +21,10 @@ function AppContent() {
   const [currentPage, setCurrentPage] = useState("home");
   const [prefilledService, setPrefilledService] = useState("");
   const [prefilledPlan, setPrefilledPlan] = useState("");
+  
+  useEffect(() => {
+    document.title = "Vector Trace Lab | Professional Vector Tracing Services";
+  }, []);
   
   const navigate = useNavigate();
 
