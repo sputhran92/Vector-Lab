@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Menu, X, Shield, ArrowRight } from "lucide-react";
+import { Menu, X, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useNavigate, useLocation } from "react-router-dom";
+import logoImg from "../assets/images/vector_trace_lab_logo_1784371213382.jpg";
 
 interface NavbarProps {
   currentPage: string;
@@ -72,8 +73,13 @@ export default function Navbar({ currentPage, onPageChange, onQuoteClick }: Navb
             className="flex items-center gap-2.5 text-primary-blue font-bold text-2xl tracking-tight select-none"
             id="nav-logo"
           >
-            <div className="bg-primary-blue text-white p-1.5 rounded-lg shadow-sm flex items-center justify-center">
-              <Shield className="w-5 h-5 stroke-[2.5]" />
+            <div className="w-9 h-9 rounded-xl overflow-hidden shadow-sm flex items-center justify-center border border-gray-100 bg-white">
+              <img 
+                src={logoImg} 
+                alt="Vector Trace Lab Logo" 
+                className="w-full h-full object-cover" 
+                referrerPolicy="no-referrer"
+              />
             </div>
             <span className="text-brand-text-dark font-extrabold flex items-center gap-1.5">
               <span className="text-gray-900">Vector</span>

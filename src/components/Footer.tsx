@@ -1,6 +1,7 @@
 import React from "react";
-import { Shield, Mail, ArrowUp } from "lucide-react";
+import { Mail, ArrowUp } from "lucide-react";
 import { Link } from "react-router-dom";
+import logoImg from "../assets/images/vector_trace_lab_logo_1784371213382.jpg";
 
 interface FooterProps {
   onPageChange: (page: string) => void;
@@ -53,8 +54,13 @@ export default function Footer({ onPageChange, onServiceSelect }: FooterProps) {
               onClick={(e) => handleLinkClick(e, "home")}
               className="flex items-center gap-2.5 text-primary-blue font-bold text-2xl tracking-tight select-none"
             >
-              <div className="bg-primary-blue text-white p-1.5 rounded-lg shadow-sm flex items-center justify-center">
-                <Shield className="w-5 h-5 stroke-[2.5]" />
+              <div className="w-9 h-9 rounded-xl overflow-hidden shadow-sm flex items-center justify-center border border-gray-100 bg-white">
+                <img 
+                  src={logoImg} 
+                  alt="Vector Trace Lab Logo" 
+                  className="w-full h-full object-cover" 
+                  referrerPolicy="no-referrer"
+                />
               </div>
               <span className="text-brand-text-dark font-extrabold">
                 Vector<span className="text-primary-blue">Lab</span>
