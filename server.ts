@@ -81,7 +81,7 @@ async function startServer() {
       res.status(200).json({ message: "Email sent successfully" });
     } catch (error: any) {
       console.error("Error sending email via SMTP:", error);
-      res.status(500).json({ error: "Failed to send email" });
+      res.status(500).json({ error: `Failed to send email: ${error.message || "Unknown SMTP error"}` });
     }
   });
 
