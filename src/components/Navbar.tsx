@@ -77,7 +77,7 @@ export default function Navbar({ currentPage, onPageChange, onQuoteClick }: Navb
               <img 
                 src={logoImg} 
                 alt="Vector Trace Lab Logo" 
-                className="w-full h-full object-contain" 
+                className="w-full h-full object-contain scale-[1.02]" 
                 referrerPolicy="no-referrer"
               />
             </div>
