@@ -18,20 +18,42 @@ async function startServer() {
   // API routes
   app.post("/api/contact", upload.array("files"), async (req, res) => {
     const { name, email, message, projectType } = req.body;
-    const files = req.files as Express.Multer.File[];
+    const files = req.files as Express.Multer.File[] || [];
 
-    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-      console.error("SMTP configuration missing");
-      return res.status(500).json({ error: "Email service not configured" });
+    const receiverEmail = process.env.CONTACT_RECEIVER_EMAIL || "info@vectortracelab.com";
+
+    // Log the contact request details on the server so they are visible even if SMTP fails
+    console.log("=== NEW CONTACT REQUEST ===");
+    console.log(`Name: ${name}`);
+    console.log(`Email: ${email}`);
+    console.log(`Project Type: ${projectType}`);
+    console.log(`Message: ${message}`);
+    console.log(`Attached Files: ${files.map(f => `${f.originalname} (${f.size} bytes)`).join(", ") || "None"}`);
+    console.log("===========================");
+
+    if (!process.env.SMTP_USER || !process.env.SMTP_PASS || !process.env.SMTP_HOST) {
+      console.warn("SMTP credentials or host are missing in server environment.");
+      return res.status(503).json({ 
+        error: "SMTP_UNCONFIGURED", 
+        message: "SMTP credentials are not configured on the server yet.",
+        receiverEmail: receiverEmail
+      });
     }
+
+    const smtpPort = Number(process.env.SMTP_PORT) || 587;
+    const isSecure = smtpPort === 465;
 
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT),
+      port: smtpPort,
+      secure: isSecure,
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
       },
+      tls: {
+        rejectUnauthorized: false // bypass SSL verification issues common with custom SMTP servers
+      }
     });
 
     const attachments = files.map(file => ({
@@ -42,16 +64,30 @@ async function startServer() {
 
     try {
       await transporter.sendMail({
-        from: process.env.SMTP_USER,
-        to: "info@vectortracelab.com",
-        subject: `New Contact Request from ${name}`,
-        text: `Name: ${name}\nEmail: ${email}\nProject Type: ${projectType}\nMessage: ${message}`,
+        from: process.env.SMTP_FROM || process.env.SMTP_USER,
+        to: receiverEmail,
+        replyTo: email, // ensures clicking "Reply" in the client goes to the submitter
+        subject: `[VTL Quote Request] ${projectType} - from ${name}`,
+        text: `You have received a new vector trace quote request.\n\n` +
+              `--- Contact Details ---\n` +
+              `Name: ${name}\n` +
+              `Email: ${email}\n` +
+              `Service Category: ${projectType}\n\n` +
+              `--- Message/Instructions ---\n` +
+              `${message || "No instructions provided."}\n\n` +
+              `-----------------------\n` +
+              `This email was generated from the Vector Trace Lab contact form.`,
         attachments
       });
+      console.log(`Email successfully sent to ${receiverEmail}`);
       res.status(200).json({ message: "Email sent successfully" });
-    } catch (error) {
-      console.error("Error sending email:", error);
-      res.status(500).json({ error: "Failed to send email" });
+    } catch (error: any) {
+      console.error("Error sending email via SMTP:", error);
+      res.status(500).json({ 
+        error: "SMTP_FAILED", 
+        message: error.message || "Failed to deliver email through SMTP server.",
+        receiverEmail: receiverEmail
+      });
     }
   });
 

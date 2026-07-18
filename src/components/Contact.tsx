@@ -16,6 +16,9 @@ export default function Contact({ prefilledService, prefilledPlan }: ContactProp
   const [isDragActive, setIsDragActive] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [receiverEmail, setReceiverEmail] = useState("info@vectortracelab.com");
+  const [copiedDetails, setCopiedDetails] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -90,11 +93,39 @@ export default function Contact({ prefilledService, prefilledPlan }: ContactProp
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
   };
 
+  const handleMailtoFallback = () => {
+    const subject = encodeURIComponent(`[Vector Trace Request] ${projectType} - from ${name || "Quote Request"}`);
+    const body = encodeURIComponent(
+      `Hi Vector Trace Lab,\n\n` +
+      `I am requesting a quote for vector tracing services:\n\n` +
+      `Name: ${name || "(Not provided)"}\n` +
+      `Email: ${email || "(Not provided)"}\n` +
+      `Service Type: ${projectType}\n\n` +
+      `Message & Special Instructions:\n${message || "No special instructions"}\n\n` +
+      `Note: I am attaching my files (${uploadedFiles.map(f => f.name).join(", ") || "none"}) to this email.\n\n` +
+      `Thanks!`
+    );
+    window.location.href = `mailto:${receiverEmail}?subject=${subject}&body=${body}`;
+  };
+
+  const handleCopyRequestDetails = () => {
+    const textToCopy = `--- Vector Tracing Quote Request ---\n` +
+      `Name: ${name}\n` +
+      `Email: ${email}\n` +
+      `Service Type: ${projectType}\n` +
+      `Special Instructions: ${message || "none"}\n` +
+      `Files to attach: ${uploadedFiles.map(f => f.name).join(", ") || "none"}`;
+    navigator.clipboard.writeText(textToCopy);
+    setCopiedDetails(true);
+    setTimeout(() => setCopiedDetails(false), 3000);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !email) return;
 
     setIsSubmitting(true);
+    setSubmitError(null);
 
     try {
       const formData = new FormData();
@@ -111,14 +142,26 @@ export default function Contact({ prefilledService, prefilledPlan }: ContactProp
         body: formData,
       });
 
+      let responseData: any = {};
+      try {
+        responseData = await response.json();
+      } catch (e) {}
+
+      if (responseData.receiverEmail) {
+        setReceiverEmail(responseData.receiverEmail);
+      }
+
       if (!response.ok) {
-        throw new Error("Failed to send email");
+        if (responseData.error === "SMTP_UNCONFIGURED") {
+          throw new Error("SMTP_UNCONFIGURED");
+        }
+        throw new Error(responseData.message || "Failed to deliver email through server SMTP.");
       }
       
       setSubmitSuccess(true);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error submitting form:", error);
-      alert("Failed to send message. Please try again or email us directly.");
+      setSubmitError(error.message || "Failed to send message. Please try the email options below.");
     } finally {
       setIsSubmitting(false);
     }
@@ -131,6 +174,7 @@ export default function Contact({ prefilledService, prefilledPlan }: ContactProp
     setMessage("");
     setUploadedFiles([]);
     setSubmitSuccess(false);
+    setSubmitError(null);
   };
 
   return (
@@ -374,6 +418,57 @@ export default function Contact({ prefilledService, prefilledPlan }: ContactProp
                       className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-primary-blue focus:ring-1 focus:ring-primary-blue/10 text-sm transition-all text-brand-text-dark resize-y"
                     />
                   </div>
+
+                  {/* Submit Error Fallback Notification */}
+                  {submitError && (
+                    <div className="bg-amber-50/85 border border-amber-200 rounded-xl p-4.5 space-y-3.5 shadow-xs" id="contact-error-card">
+                      <div className="flex items-start gap-3 text-amber-900 text-xs sm:text-sm">
+                        <ShieldAlert className="w-5 h-5 flex-shrink-0 text-amber-600 mt-0.5" />
+                        <div className="space-y-1">
+                          <p className="font-extrabold text-amber-950">Email Service is offline or unconfigured</p>
+                          <p className="text-xs text-amber-800 leading-relaxed font-medium">
+                            {submitError === "SMTP_UNCONFIGURED" 
+                              ? "The server's automated SMTP mailing system has not been fully configured yet."
+                              : `The server's mail system returned an error: "${submitError}".`}
+                          </p>
+                          <p className="text-xs text-amber-800 font-semibold leading-relaxed">
+                            Don't worry! You can easily submit your files and notes directly to us right now using the instant options below:
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                        <button
+                          type="button"
+                          onClick={handleMailtoFallback}
+                          className="w-full bg-primary-blue hover:bg-primary-blue/90 text-white font-bold text-xs py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow-md cursor-pointer"
+                        >
+                          <Mail className="w-4 h-4" />
+                          Send Direct Email (mailto:)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleCopyRequestDetails}
+                          className="w-full bg-white hover:bg-gray-50 text-brand-text-dark border border-gray-200 font-bold text-xs py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer"
+                        >
+                          {copiedDetails ? (
+                            <>
+                              <CheckCircle2 className="w-4 h-4 text-green-500" />
+                              Copied details!
+                            </>
+                          ) : (
+                            <>
+                              <FileText className="w-4 h-4 text-gray-500" />
+                              Copy Request Details
+                            </>
+                          )}
+                        </button>
+                      </div>
+                      <p className="text-[10px] text-amber-700/80 text-center font-medium leading-normal">
+                        💡 Attach your raster/sketch files directly in your email app and send to: <a href={`mailto:${receiverEmail}`} className="underline font-bold text-primary-blue hover:text-primary-blue/80">{receiverEmail}</a>
+                      </p>
+                    </div>
+                  )}
 
                   {/* Submit Button */}
                   <button
