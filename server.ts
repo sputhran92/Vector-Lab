@@ -31,20 +31,17 @@ async function startServer() {
     console.log(`Attached Files: ${files.map(f => `${f.originalname} (${f.size} bytes)`).join(", ") || "None"}`);
     console.log("===========================");
 
-    if (!process.env.SMTP_USER || !process.env.SMTP_PASS || !process.env.SMTP_HOST) {
-      console.warn("SMTP credentials or host are missing in server environment.");
-      return res.status(503).json({ 
-        error: "SMTP_UNCONFIGURED", 
-        message: "SMTP credentials are not configured on the server yet.",
-        receiverEmail: receiverEmail
-      });
+    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+      console.error("SMTP configuration missing");
+      return res.status(500).json({ error: "Email service not configured" });
     }
 
+    const smtpHost = process.env.SMTP_HOST || "smtp.gmail.com";
     const smtpPort = Number(process.env.SMTP_PORT) || 587;
     const isSecure = smtpPort === 465;
 
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
+      host: smtpHost,
       port: smtpPort,
       secure: isSecure,
       auth: {
@@ -83,11 +80,7 @@ async function startServer() {
       res.status(200).json({ message: "Email sent successfully" });
     } catch (error: any) {
       console.error("Error sending email via SMTP:", error);
-      res.status(500).json({ 
-        error: "SMTP_FAILED", 
-        message: error.message || "Failed to deliver email through SMTP server.",
-        receiverEmail: receiverEmail
-      });
+      res.status(500).json({ error: "Failed to send email" });
     }
   });
 
