@@ -75,8 +75,10 @@ export default function Navbar({ currentPage, onPageChange, onQuoteClick }: Navb
             <div className="bg-primary-blue text-white p-1.5 rounded-lg shadow-sm flex items-center justify-center">
               <Shield className="w-5 h-5 stroke-[2.5]" />
             </div>
-            <span className="text-brand-text-dark font-extrabold flex items-center">
-              Vector<span className="text-primary-blue">Lab</span>
+            <span className="text-brand-text-dark font-extrabold flex items-center gap-1.5">
+              <span className="text-gray-900">Vector</span>
+              <span className="text-primary-blue">Trace</span>
+              <span className="text-gray-900">Lab</span>
             </span>
           </a>
 

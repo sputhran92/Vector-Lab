@@ -7,6 +7,9 @@ import Features from "./components/Features";
 import Process from "./components/Process";
 import FeaturedPortfolio from "./components/FeaturedPortfolio";
 import Portfolio from "./components/Portfolio";
+import Terms from "./components/Terms";
+import RefundPolicy from "./components/RefundPolicy";
+import PrivacyPolicy from "./components/PrivacyPolicy";
 import Pricing from "./components/Pricing";
 import Testimonials from "./components/Testimonials";
 import FAQ from "./components/FAQ";
@@ -140,6 +143,12 @@ function AppContent() {
 
         {/* New Separate Page called "Portfolio" */}
         <Route path="/portfolio" element={<Portfolio />} />
+        {/* New Separate Page called "Terms" */}
+        <Route path="/terms" element={<Terms />} />
+        {/* New Separate Page called "RefundPolicy" */}
+        <Route path="/refund-policy" element={<RefundPolicy />} />
+        {/* New Separate Page called "PrivacyPolicy" */}
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       </Routes>
 
       {/* 11. Footer */}

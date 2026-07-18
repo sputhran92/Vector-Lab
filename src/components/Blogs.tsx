@@ -1,195 +1,72 @@
-import React, { useState } from "react";
-import { Search, Calendar, Clock, User, ArrowRight, X, BookOpen, ChevronRight, Share2, Sparkles, SlidersHorizontal } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { 
+  Search, 
+  Calendar, 
+  Clock, 
+  User, 
+  ArrowRight, 
+  ArrowLeft, 
+  X, 
+  BookOpen, 
+  Share2, 
+  Sparkles, 
+  Mail, 
+  CheckCircle2, 
+  Bookmark, 
+  ThumbsUp, 
+  MessageSquare,
+  Compass,
+  FileText
+} from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
-interface BlogPost {
-  id: string;
-  title: string;
-  summary: string;
-  category: "Branding" | "Apparel" | "Fabrication" | "Vector Basics";
-  author: string;
-  date: string;
-  readTime: string;
-  content: string[];
-  imageGradient: string;
-}
+import { BlogPost, blogs } from "../data/blogsData";
 
 export default function Blogs() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [activeBlog, setActiveBlog] = useState<BlogPost | null>(null);
+  const [emailInput, setEmailInput] = useState("");
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [likedPosts, setLikedPosts] = useState<Record<string, boolean>>({});
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  const blogs: BlogPost[] = [
-    {
-      id: "manual-vs-auto",
-      title: "The Ultimate Guide to Manual Vector Tracing vs. Auto-Tracing",
-      summary: "Explore why manual anchor-point recreation beats machine-generated Image Trace algorithms every single time for production-ready designs.",
-      category: "Vector Basics",
-      author: "Marcus Chen (Senior Vector Designer)",
-      date: "July 12, 2026",
-      readTime: "6 min read",
-      imageGradient: "from-blue-500 to-indigo-600",
-      content: [
-        "In the digital design workspace, the allure of 'one-click' auto-tracing software is undeniable. Tools like Adobe Illustrator's Image Trace promise to instantly convert fuzzy pixel grids into pristine vector artwork. But for professional fabricators, apparel printers, and brand managers, auto-tracing is a critical pitfall.",
-        "Auto-trace engines work by executing color-contrast boundary detection algorithms. They cannot understand the underlying design intent. A circle becomes a bumpy polygon; a sharp sans-serif font letter gets rounded into blobby corners; and complex intersections get fused into messy, uneditable nodes.",
-        "Manual tracing, on the other hand, is a master-level craft. A professional designer inspects the original asset, selects the Pen Tool, and manually drafts bezier anchor points. This human-led approach ensures that curves are perfectly tangential, symmetrical shapes are mathematically balanced, and the anchor point count is minimized. Fewer anchor points translate to cleaner cuts on vinyl plotters and seamless stitching on embroidery runs.",
-        "When consistency, scalability, and technical perfection matter, manual tracing is the only standard that guarantees production-ready assets."
-      ]
-    },
-    {
-      id: "screen-printing-prep",
-      title: "Prepping Graphics for Screen Printing and Direct-to-Garment",
-      summary: "Learn essential tips on color separations, solid color fills, and why flat vectors are a screen printer's best friend.",
-      category: "Apparel",
-      author: "Sarah Jenkins (Apparel Lead)",
-      date: "June 28, 2026",
-      readTime: "5 min read",
-      imageGradient: "from-rose-500 to-orange-500",
-      content: [
-        "Screen printing is a physical chemistry process. Each color in your design requires its own custom mesh screen, exposing light-sensitive emulsion to solid, opaque film positives. Therefore, the artwork must be structured perfectly for color isolation.",
-        "Raster images with gradients or anti-aliased soft edges create 'halftones' that are difficult to isolate cleanly without expensive color-separation programs. Vectors solve this naturally by defining flat, absolute boundaries for each colored region.",
-        "When preparing vector artwork for apparel, always use standard Pantone Solid Coated colors. This allows physical ink mixing to precisely match the digital intent. Additionally, ensure all overlapping shapes are 'knocked out' or 'merged' so ink layers don't stack excessively, leading to thick, heavy 'hand-feel' prints that crack after three washes.",
-        "By delivering clean, single-layer hand-traced vectors with absolute paths, apparel shops can directly import the file and burn screens in minutes."
-      ]
-    },
-    {
-      id: "recreating-lost-logo",
-      title: "How to Recreate a Lost Logo from a Low-Res Screenshot",
-      summary: "A behind-the-scenes walkthrough of restoring historic brand files using geometry, custom typography tracing, and path math.",
-      category: "Branding",
-      author: "David Vance (Brand Architect)",
-      date: "June 15, 2026",
-      readTime: "8 min read",
-      imageGradient: "from-emerald-500 to-teal-600",
-      content: [
-        "It happens to the best of companies: years pass, marketing agencies change, and suddenly the original vector logo files are nowhere to be found. All that remains is a blurry 200px wide JPEG on a historical website header or a scan of an old business card.",
-        "Recreating a brand's visual identity from low-resolution pixels is equal parts forensic science and fine art. The first step is identifying the core geometric system. We analyze the logo's structure to determine if it is based on golden ratio proportions, nested circles, or a strict grid alignment.",
-        "Next comes typography reconstruction. Since font files evolve, matching legacy text requires manual curve drawing. We outline each letter stem, terminal, and counter individually rather than looking for a close system font alternative.",
-        "The final result is more than just a vector copy; it is a brand restoration that honors the original creator's blueprint with modern technical compliance."
-      ]
-    },
-    {
-      id: "laser-cutting-cnc",
-      title: "Designing for Laser Cutting, CNC Routing, and Metal Engraving",
-      summary: "Why vector lines, closed physical paths, and exact coordinate boundaries are non-negotiable for manufacturing fabrication.",
-      category: "Fabrication",
-      author: "Viktor Kovalenko (Industrial Fabrication Specialist)",
-      date: "May 30, 2026",
-      readTime: "7 min read",
-      imageGradient: "from-indigo-500 to-purple-600",
-      content: [
-        "Unlike computer monitors that display color pixels, laser cutters, waterjets, and CNC routing machines navigate physical space. They interpret vector lines as exact travel paths for a laser head, cutter blade, or plasma torch.",
-        "If a vector file contains overlapping lines or unjoined 'open' coordinates, the CNC laser will double-cut the same area, burning or warping the material. If paths are not fully closed, the cut-out shape will fail to separate from the main sheet.",
-        "When we prepare files for fabrication, we double-check the wireframe using zero-stroke modes. We delete double lines, merge overlapping nodes, and ensure all curves are smooth, continuous bezier splines. This reduces physical cutting friction, avoids burning, and produces ultra-smooth product edges.",
-        "Ensuring correct vector compliance saves hours of machine calibration and prevents wasting expensive sheet metals, woods, or acrylics."
-      ]
-    },
-    {
-      id: "pantone-matching",
-      title: "The Role of Pantone Color Matching in Brand Preservation",
-      summary: "Understand how to maintain strict brand color integrity across both digital screens and physical print using vector swatches.",
-      category: "Branding",
-      author: "David Vance (Brand Architect)",
-      date: "May 14, 2026",
-      readTime: "5 min read",
-      imageGradient: "from-amber-500 to-pink-500",
-      content: [
-        "Have you ever noticed how a brand's blue looks electric on a mobile screen, but dull and purple on a printed brochure? This is the core challenge of RGB (light-based) versus CMYK (pigment-based) color spaces.",
-        "To bridge this gap, the Pantone Matching System (PMS) provides a universal color standard. By encoding vectors with specific Pantone swatches, you guarantee that whether the file is sent to a digital banner printer in Seattle or an offset packaging press in Tokyo, the output color will remain identical.",
-        "In our vector tracing pipeline, we cross-reference raw raster RGB values with the physical Pantone Solid Coated bridge formula. This ensures that your brand guidelines are built into the source file metadata.",
-        "Preserving your brand's unique color signature creates subconscious trust and immediate recognition among consumers."
-      ]
-    },
-    {
-      id: "bezier-curves-mastery",
-      title: "Understanding Bezier Curves and Anchor Point Placement",
-      summary: "Expert tips and guidelines for achieving perfect curves using the absolute minimum number of vector anchor points.",
-      category: "Vector Basics",
-      author: "Marcus Chen (Senior Vector Designer)",
-      date: "April 29, 2026",
-      readTime: "6 min read",
-      imageGradient: "from-cyan-500 to-blue-600",
-      content: [
-        "The defining signature of a novice vector designer is an abundance of anchor points. Placing an anchor point every few pixels results in jagged, bumpy curves that look amateurish and print poorly.",
-        "The secret to vector mastery lies in the 'Rule of Extremas'. Anchor points should only be placed at the outermost horizontal and vertical points of a curve. The curve itself should be shaped entirely by pulling the bezier handles out at 0, 90, 180, or 270-degree angles.",
-        "This coordinate alignment guarantees mathematically flawless transitions and simplifies future file edits. If you ever need to change a logo's proportions, adjusting four anchors is far easier than fighting forty.",
-        "By focusing on geometric restraint, we deliver vector assets that are extremely lightweight, infinitely scalable, and simple for any developer or printer to adjust."
-      ]
-    },
-    {
-      id: "file-formats-explained",
-      title: "Best Vector File Formats Explained: AI, EPS, SVG, and PDF",
-      summary: "Demystifying file extensions so you know exactly which scale-free vector format is required for web, print, or fabrication.",
-      category: "Vector Basics",
-      author: "Sarah Jenkins (Apparel Lead)",
-      date: "April 10, 2026",
-      readTime: "4 min read",
-      imageGradient: "from-violet-500 to-fuchsia-600",
-      content: [
-        "You've received your final vector tracing delivery bundle, and it contains five different file extensions: .ai, .eps, .svg, .pdf, and .png. Which one do you actually use for your next campaign?",
-        "**AI (Adobe Illustrator)**: The ultimate native working project file. Keep this safe! It retains all layer groups, swatches, transparency states, and editing history.",
-        "**EPS (Encapsulated PostScript)**: The standard universal format for professional commercial printing. If you are sending graphics to an external print house for banners or billboards, this is their favorite format.",
-        "**SVG (Scalable Vector Graphics)**: The vector format built specifically for the web. SVGs are written in XML code, meaning they are incredibly tiny files, load instantly, and remain razor-sharp on high-resolution Retina screens.",
-        "**PDF (Portable Document Format)**: The perfect file for cross-platform sharing. Anyone can open it on their phone or laptop, yet it still holds vector path data inside for immediate high-quality print.",
-        "Having the full arsenal of formats ensures your business is fully equipped for any creative production workflow."
-      ]
-    },
-    {
-      id: "large-format-signage",
-      title: "Scalable Signage: Prepping Large-Format Banner Vectors",
-      summary: "How to ensure vehicle wraps, billboards, and trade show displays stay perfectly crisp, lightweight, and render without crashing printing rigs.",
-      category: "Fabrication",
-      author: "Viktor Kovalenko (Industrial Fabrication Specialist)",
-      date: "March 24, 2026",
-      readTime: "7 min read",
-      imageGradient: "from-teal-500 to-emerald-600",
-      content: [
-        "Designing a billboard is visually different from designing a business card, but technically they share one rule: if the source image is raster-based, scaling it up to 40 feet wide will result in massive, ugly pixelated blocks.",
-        "A 300 DPI image at billboard scale would result in a file size of over 15 Gigabytes, which would crash most standard design computers and printer rigs. A vector file of the exact same billboard, however, is often less than 2 Megabytes.",
-        "Vectors represent shapes as mathematical equations (coordinates, curves, fills), not grids of colored pixels. You can scale a 2-inch vector logo to the size of a mountain, and it will render in milliseconds with zero pixel degradation.",
-        "When we prepare large-format banners, we also ensure correct boundary bleeds and crop marks are integrated into the vector output, guaranteeing a stress-free install."
-      ]
-    },
-    {
-      id: "sketch-to-vector-pipeline",
-      title: "Sketch-to-Vector: Digitizing Hand-Drawn Notebook Illustrations",
-      summary: "A step-by-step look at how raw pencil sketches on paper are transformed into clean, balanced digital vectors.",
-      category: "Apparel",
-      author: "Marcus Chen (Senior Vector Designer)",
-      date: "March 05, 2026",
-      readTime: "5 min read",
-      imageGradient: "from-sky-500 to-indigo-500",
-      content: [
-        "Many of the greatest logos and illustrations start on a humble napkin or lined notebook page. But a raw pencil sketch cannot be directly printed on products or integrated into web applications.",
-        "Our digitization pipeline begins by importing the high-resolution photo or scan of the sketch. We reduce its opacity to create a 'template layer'. Our senior designers then analyze the sketch to identify the structural lines that should be perfectly straight, and the curves that require mathematical symmetry.",
-        "We don't simply trace over the pencil lines—pencil lines are often shaky or uneven. We re-engineer the illustration using clean geometric primitives (perfect circles, arcs, polygons) to bring professional polish to the raw idea.",
-        "This hybrid approach preserves the unique human soul of your hand-drawn concept while elevating it into a clean, modern digital asset."
-      ]
-    },
-    {
-      id: "embroidery-digitization",
-      title: "Why Embroidery Digitization Requires Clean Hand-Traced Vectors",
-      summary: "How jagged automatic tracing lines destroy embroidery stitching layouts and ruin expensive sewing machinery.",
-      category: "Fabrication",
-      author: "Sarah Jenkins (Apparel Lead)",
-      date: "February 18, 2026",
-      readTime: "6 min read",
-      imageGradient: "from-orange-500 to-rose-600",
-      content: [
-        "Embroidery machines are highly specialized robots that stitch patterns using physical threads. To program these machines, designers use 'digitization software' that converts graphic shapes into stitch directions, densities, and thread sequences.",
-        "If you feed an auto-traced graphic into embroidery software, the messy zigzag lines and stray anchor points create chaotic stitch paths. The sewing needle will bunch up in the same spot, breaking the thread, warping the fabric, or even snapping the machine's needle.",
-        "By contrast, hand-drawn vector paths feature clean, logical directions. The software can easily calculate satin stitches, fill stitches, and running borders because the vector's coordinates are clean and deliberate.",
-        "A perfect physical embroidered patch or polo shirt logo is only as good as the underlying vector lines that guide the machine's needle."
-      ]
+  // Automatically scroll to top when changing active blog
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [activeBlog]);
+
+  const handleSubscribe = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (emailInput.trim()) {
+      setIsSubscribed(true);
+      setTimeout(() => {
+        setEmailInput("");
+      }, 3000);
     }
-  ];
+  };
+
+  const handleLike = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setLikedPosts(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const copyToClipboard = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const url = `${window.location.origin}/blogs/${id}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 2000);
+    });
+  };
 
   // Filtering & Search logic
   const filteredBlogs = blogs.filter((blog) => {
     const matchesSearch =
       blog.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       blog.summary.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      blog.author.toLowerCase().includes(searchQuery.toLowerCase());
+      blog.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      blog.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
     
     const matchesCategory =
       selectedCategory === "All" || blog.category === selectedCategory;
@@ -198,225 +75,667 @@ export default function Blogs() {
   });
 
   const categories = ["All", "Branding", "Apparel", "Fabrication", "Vector Basics"];
+  
+  // Featured Blog post is always the manual-vs-auto guide
+  const featuredBlog = blogs.find(b => b.id === "manual-vs-auto") || blogs[0];
+  const gridBlogs = filteredBlogs.filter(b => b.id !== (activeBlog ? "" : featuredBlog.id));
+
+  // Render Category-Specific SVG Decorative Illustration to feel like an actual high-end trace lab
+  const renderCardIllustration = (category: string) => {
+    switch (category) {
+      case "Vector Basics":
+        return (
+          <svg className="w-full h-full opacity-20 absolute inset-0 text-white" viewBox="0 0 200 100" fill="none" stroke="currentColor" strokeWidth="1">
+            <path d="M20,50 C60,20 140,80 180,50" />
+            <circle cx="20" cy="50" r="3.5" fill="currentColor" />
+            <circle cx="180" cy="50" r="3.5" fill="currentColor" />
+            <circle cx="75" cy="40" r="2.5" fill="currentColor" />
+            <line x1="75" y1="40" x2="60" y2="20" strokeDasharray="2" />
+            <rect x="57" y="17" width="6" height="6" fill="currentColor" />
+            <line x1="125" y1="60" x2="140" y2="80" strokeDasharray="2" />
+            <rect x="137" y="77" width="6" height="6" fill="currentColor" />
+            <circle cx="125" cy="60" r="2.5" fill="currentColor" />
+          </svg>
+        );
+      case "Apparel":
+        return (
+          <svg className="w-full h-full opacity-20 absolute inset-0 text-white" viewBox="0 0 200 100" fill="none" stroke="currentColor" strokeWidth="1">
+            <path d="M40,25 L65,25 L75,35 L90,15 L110,15 L125,35 L135,25 L160,25 L165,55 L145,55 L145,85 L55,85 L55,55 L35,55 Z" />
+            <circle cx="100" cy="50" r="15" strokeDasharray="2" />
+            <path d="M90,50 L110,50" />
+            <path d="M100,40 L100,60" />
+          </svg>
+        );
+      case "Branding":
+        return (
+          <svg className="w-full h-full opacity-20 absolute inset-0 text-white" viewBox="0 0 200 100" fill="none" stroke="currentColor" strokeWidth="1">
+            <rect x="60" y="20" width="80" height="60" rx="4" />
+            <circle cx="100" cy="50" r="18" />
+            <polygon points="100,38 111,58 89,58" />
+            <line x1="40" y1="50" x2="60" y2="50" />
+            <line x1="140" y1="50" x2="160" y2="50" />
+          </svg>
+        );
+      case "Fabrication":
+        return (
+          <svg className="w-full h-full opacity-20 absolute inset-0 text-white" viewBox="0 0 200 100" fill="none" stroke="currentColor" strokeWidth="0.75">
+            <grid width="10" height="10" />
+            <line x1="10" y1="10" x2="190" y2="90" strokeDasharray="4" />
+            <circle cx="100" cy="50" r="30" />
+            <path d="M85,35 L115,65 M115,35 L85,65" />
+            <rect x="25" y="15" width="150" height="70" strokeDasharray="3 3" />
+          </svg>
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
-    <section className="py-12 md:py-16 bg-white min-h-[75vh]" id="blogs">
+    <section className="py-12 md:py-20 bg-gray-50 min-h-[85vh] transition-all duration-500" id="blogs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Page Title Header */}
-        <div className="text-center max-w-3xl mx-auto mb-12 space-y-4" id="blogs-page-header">
-          <span className="text-primary-blue text-xs font-bold uppercase tracking-widest bg-primary-blue/10 px-3 py-1 rounded-full inline-flex items-center gap-1.5">
-            <BookOpen className="w-3.5 h-3.5" />
-            Knowledge Base & Insights
-          </span>
-          <h2 className="text-3xl md:text-4xl font-extrabold text-brand-text-dark tracking-tight">
-            Vector Design & Printing Blogs
-          </h2>
-          <p className="text-brand-text-body text-base md:text-lg">
-            Stay ahead with the latest industry guides, technical workflows, print preparation checklists, and brand preservation advice written by our senior design team.
-          </p>
-        </div>
-
-        {/* Search and Filters panel */}
-        <div className="bg-brand-bg-light p-5 rounded-2xl border border-gray-100 mb-10 flex flex-col md:flex-row items-center justify-between gap-4" id="blogs-filter-bar">
-          {/* Live Search */}
-          <div className="relative w-full md:max-w-md">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400">
-              <Search className="w-5 h-5" />
-            </span>
-            <input
-              type="text"
-              placeholder="Search guides, authors, keywords..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white text-brand-text-dark pl-11 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-primary-blue focus:ring-2 focus:ring-primary-blue/10 text-sm transition-all shadow-xs"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery("")}
-                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
-          </div>
-
-          {/* Categories select */}
-          <div className="flex flex-wrap items-center justify-center gap-2" id="blog-category-pills">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  selectedCategory === cat
-                    ? "bg-primary-blue text-white shadow-xs scale-105"
-                    : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Blogs grid */}
-        {filteredBlogs.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="blogs-grid">
-            {filteredBlogs.map((blog, idx) => (
-              <motion.article
-                key={blog.id}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.35, delay: idx * 0.04 }}
-                className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between h-full group"
-                id={`blog-card-${blog.id}`}
-              >
-                <div>
-                  {/* Card Header Gradient cover */}
-                  <div className={`h-40 bg-gradient-to-br ${blog.imageGradient} p-6 flex flex-col justify-between relative overflow-hidden`}>
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-8 -mt-8 blur-xl" />
-                    
-                    <span className="self-start text-[10px] font-extrabold uppercase tracking-widest bg-white/20 backdrop-blur-md text-white px-2.5 py-1 rounded-full">
-                      {blog.category}
-                    </span>
-
-                    <div className="flex items-center gap-3 text-white/95 text-xs">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-3.5 h-3.5" />
-                        <span>{blog.date}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-3.5 h-3.5" />
-                        <span>{blog.readTime}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Card Body content */}
-                  <div className="p-6 space-y-3">
-                    <h3 className="text-lg font-extrabold text-brand-text-dark group-hover:text-primary-blue transition-colors line-clamp-2 leading-snug">
-                      {blog.title}
-                    </h3>
-                    <p className="text-brand-text-body text-xs sm:text-sm line-clamp-3 leading-relaxed">
-                      {blog.summary}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Card Footer author info & CTA */}
-                <div className="px-6 pb-6 pt-4 border-t border-gray-50 flex items-center justify-between mt-auto">
-                  <div className="flex items-center gap-1.5 text-xs text-brand-text-body">
-                    <User className="w-3.5 h-3.5 text-primary-blue" />
-                    <span className="truncate max-w-[120px] font-medium">{blog.author.split(" (")[0]}</span>
-                  </div>
-
-                  <button
-                    onClick={() => setActiveBlog(blog)}
-                    className="text-xs font-extrabold text-primary-blue hover:text-accent-blue transition-colors flex items-center gap-1 cursor-pointer"
-                  >
-                    Read Guide
-                    <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
-                  </button>
-                </div>
-              </motion.article>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-20 bg-brand-bg-light rounded-2xl border border-dashed border-gray-200" id="blogs-empty-state">
-            <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <h4 className="font-bold text-brand-text-dark text-base">No guides match your filter</h4>
-            <p className="text-xs text-brand-text-body max-w-sm mx-auto mt-1">
-              Try adjusting your keyword query or select a different design and vector category pill above.
-            </p>
-            <button
-              onClick={() => { setSearchQuery(""); setSelectedCategory("All"); }}
-              className="mt-4 text-xs font-bold bg-primary-blue text-white px-4 py-2 rounded-xl hover:bg-primary-blue/90 transition-all cursor-pointer"
-            >
-              Reset Filters
-            </button>
-          </div>
-        )}
-
-        {/* Detailed Modal Overlay for Active Blog Reader */}
-        <AnimatePresence>
-          {activeBlog && (
+        <AnimatePresence mode="wait">
+          {!activeBlog ? (
+            /* ========================================================================= */
+            /* 1. MAIN BLOG INDEX VIEW                                                   */
+            /* ========================================================================= */
             <motion.div
+              key="blog-list"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/60 backdrop-blur-xs z-[150] flex items-center justify-center p-4"
-              onClick={() => setActiveBlog(null)}
-              id="blog-modal-backdrop"
+              className="space-y-12"
             >
-              <motion.div
-                initial={{ scale: 0.95, y: 15 }}
-                animate={{ scale: 1, y: 0 }}
-                exit={{ scale: 0.95, y: 15 }}
-                transition={{ type: "spring", duration: 0.4 }}
-                className="bg-white w-full max-w-3xl rounded-2xl shadow-2xl max-h-[85vh] overflow-y-auto"
-                onClick={(e) => e.stopPropagation()}
-                id="blog-reader-modal"
-              >
-                {/* Modal Cover Image */}
-                <div className={`h-48 md:h-56 bg-gradient-to-br ${activeBlog.imageGradient} p-8 flex flex-col justify-between relative`}>
-                  <button
-                    onClick={() => setActiveBlog(null)}
-                    className="absolute top-4 right-4 bg-white/20 hover:bg-white/30 text-white p-2 rounded-xl transition-all border border-white/10 cursor-pointer"
-                    aria-label="Close reader"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
+              {/* Header Title block */}
+              <div className="text-center max-w-3xl mx-auto space-y-4 mb-10">
+                <span className="text-primary-blue text-xs font-bold uppercase tracking-widest bg-primary-blue/10 px-4.5 py-1.5 rounded-full inline-flex items-center gap-2 shadow-xs">
+                  <Sparkles className="w-3.5 h-3.5 animate-pulse text-primary-blue" />
+                  Vector Design Journal & Guides
+                </span>
+                <h1 className="text-3xl md:text-5xl font-extrabold text-brand-text-dark tracking-tight leading-tight">
+                  Insights from the <span className="text-primary-blue">Trace Lab</span>
+                </h1>
+                <p className="text-gray-500 text-sm md:text-base max-w-2xl mx-auto leading-relaxed">
+                  Discover production-ready print checklists, vectorization design standards, typography restoration files, and professional industry guides.
+                </p>
+              </div>
 
-                  <span className="self-start text-xs font-extrabold uppercase tracking-widest bg-white/25 text-white px-3 py-1 rounded-full">
-                    {activeBlog.category}
-                  </span>
+              {/* Featured Post Card (Highly prominent, split layout) */}
+              {selectedCategory === "All" && !searchQuery && featuredBlog && (
+                <div className="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-500 group" id="featured-post-card">
+                  <div className="grid grid-cols-1 lg:grid-cols-12">
+                    {/* Left Column: Cover Pattern */}
+                    <div className="lg:col-span-5 bg-slate-900 relative min-h-[250px] lg:min-h-[380px] flex items-center justify-center p-8 overflow-hidden">
+                      <img 
+                        src={featuredBlog.heroImage} 
+                        alt={featuredBlog.title} 
+                        className="absolute inset-0 w-full h-full object-cover z-0 group-hover:scale-105 transition-transform duration-700 opacity-60"
+                        referrerPolicy="no-referrer"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-tr from-slate-950 via-slate-900/50 to-slate-950/25 z-0" />
+                      
+                      {/* Interactive Abstract bezier lines behind */}
+                      <svg className="absolute inset-0 w-full h-full opacity-35 text-primary-blue z-0" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="0.5">
+                        <path d="M0,50 C30,20 70,80 100,50" />
+                        <path d="M0,30 C40,90 60,10 100,70" strokeDasharray="3" />
+                        <circle cx="50" cy="50" r="2" fill="currentColor" />
+                      </svg>
 
-                  <div>
-                    <h3 className="text-xl md:text-2xl font-black text-white leading-tight pr-8">
-                      {activeBlog.title}
-                    </h3>
+                      {/* Content badge and title inside graphic */}
+                      <div className="relative z-10 text-center space-y-4">
+                        <span className="bg-primary-blue/30 backdrop-blur-md text-white border border-white/20 text-[10px] font-bold uppercase tracking-widest px-3.5 py-1 rounded-full shadow-md">
+                          Featured Blueprint
+                        </span>
+                        <div className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 mx-auto flex items-center justify-center text-white shadow-lg">
+                          <Compass className="w-8 h-8 text-primary-blue animate-spin-slow" />
+                        </div>
+                        <p className="text-white/80 text-[11px] font-mono tracking-wider">VECTOR TRACE LAB RESEARCH</p>
+                      </div>
+                    </div>
+
+                    {/* Right Column: Editorial Details */}
+                    <div className="lg:col-span-7 p-8 md:p-12 flex flex-col justify-between space-y-6">
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-3 text-xs text-gray-400">
+                          <span className="text-primary-blue font-bold uppercase tracking-wider">{featuredBlog.category}</span>
+                          <span>•</span>
+                          <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" />{featuredBlog.date}</span>
+                          <span>•</span>
+                          <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{featuredBlog.readTime}</span>
+                        </div>
+
+                        <h2 className="text-2xl md:text-3xl font-black text-brand-text-dark leading-tight group-hover:text-primary-blue transition-colors">
+                          {featuredBlog.title}
+                        </h2>
+
+                        <p className="text-gray-500 text-sm md:text-base leading-relaxed">
+                          {featuredBlog.summary}
+                        </p>
+
+                        <div className="flex flex-wrap gap-1.5 pt-2">
+                          {featuredBlog.tags.map(tag => (
+                            <span key={tag} className="text-[11px] bg-gray-100 text-gray-600 px-2.5 py-1 rounded-md font-medium">
+                              #{tag}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Footer author info & CTA */}
+                      <div className="pt-6 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                          <img 
+                            src={featuredBlog.authorAvatar} 
+                            alt={featuredBlog.author} 
+                            className="w-10 h-10 rounded-full object-cover border-2 border-primary-blue/20" 
+                          />
+                          <div>
+                            <p className="text-sm font-bold text-brand-text-dark">{featuredBlog.author}</p>
+                            <p className="text-[11px] text-gray-400">{featuredBlog.authorTitle}</p>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => setActiveBlog(featuredBlog)}
+                          className="bg-brand-text-dark hover:bg-primary-blue text-white hover:shadow-lg hover:shadow-primary-blue/20 transition-all duration-300 px-6 py-3 rounded-xl text-xs font-bold inline-flex items-center gap-2 self-start sm:self-auto cursor-pointer"
+                        >
+                          Read Featured Article
+                          <ArrowRight className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
+              )}
 
-                {/* Modal Metadata Line */}
-                <div className="px-6 py-4 bg-brand-bg-light border-b border-gray-100 flex flex-wrap items-center gap-y-2 gap-x-6 text-xs text-brand-text-body">
-                  <span className="flex items-center gap-1.5 font-bold text-brand-text-dark">
-                    <User className="w-4 h-4 text-primary-blue" />
-                    {activeBlog.author}
+              {/* Filters and Search Container */}
+              <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-xs flex flex-col md:flex-row gap-6 items-center justify-between" id="blog-toolbar">
+                {/* Search Bar */}
+                <div className="relative w-full md:max-w-md">
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-gray-400">
+                    <Search className="w-5 h-5" />
                   </span>
-                  <span className="flex items-center gap-1.5">
-                    <Calendar className="w-4 h-4 text-primary-blue" />
-                    {activeBlog.date}
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <Clock className="w-4 h-4 text-primary-blue" />
-                    {activeBlog.readTime}
-                  </span>
+                  <input
+                    type="text"
+                    placeholder="Search guides, vector workflows, keywords..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full bg-gray-50 text-brand-text-dark pl-12 pr-4 py-3 rounded-xl border border-gray-100 focus:outline-none focus:border-primary-blue focus:ring-4 focus:ring-primary-blue/5 text-sm transition-all placeholder:text-gray-400"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery("")}
+                      className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 hover:text-gray-600"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
 
-                {/* Modal Body content */}
-                <div className="p-6 md:p-8 space-y-5 text-sm sm:text-base text-brand-text-body leading-relaxed">
-                  {activeBlog.content.map((paragraph, index) => (
-                    <p key={index} className="text-brand-text-body">
-                      {paragraph}
-                    </p>
+                {/* Categories Tab Navigation */}
+                <div className="flex flex-wrap items-center justify-center gap-1.5" id="blog-category-nav">
+                  {categories.map((cat) => (
+                    <button
+                      key={cat}
+                      onClick={() => setSelectedCategory(cat)}
+                      className={`px-4.5 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 cursor-pointer ${
+                        selectedCategory === cat
+                          ? "bg-primary-blue text-white shadow-md shadow-primary-blue/15 scale-105"
+                          : "bg-gray-50 text-gray-600 hover:bg-gray-100 border border-transparent hover:border-gray-200"
+                      }`}
+                    >
+                      {cat}
+                    </button>
                   ))}
                 </div>
+              </div>
 
-                {/* Modal Footer actions */}
-                <div className="p-6 border-t border-gray-100 bg-gray-50 flex items-center justify-between rounded-b-2xl">
-                  <div className="flex items-center gap-2 text-xs text-gray-400">
-                    <Sparkles className="w-4 h-4 text-primary-blue" />
-                    <span>Meticulously verified vector resource</span>
-                  </div>
+              {/* Grid of Articles */}
+              {filteredBlogs.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="blogs-index-grid">
+                  {/* If searching or filtering category, show all including featured, otherwise filter out featured */}
+                  {(selectedCategory !== "All" || searchQuery ? filteredBlogs : gridBlogs).map((blog, idx) => (
+                    <motion.article
+                      key={blog.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, delay: idx * 0.05 }}
+                      onClick={() => setActiveBlog(blog)}
+                      className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between h-full cursor-pointer group"
+                      id={`blog-card-${blog.id}`}
+                    >
+                      <div>
+                        {/* Interactive Hero Image Header */}
+                        <div className="h-48 relative overflow-hidden p-6 flex flex-col justify-between">
+                          <img 
+                            src={blog.heroImage} 
+                            alt={blog.title} 
+                            className="absolute inset-0 w-full h-full object-cover z-0 group-hover:scale-105 transition-transform duration-500"
+                            referrerPolicy="no-referrer"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-900/30 to-slate-950/40 z-0" />
+                          
+                          {/* Beautiful thematic svg pattern overlay */}
+                          <div className="absolute inset-0 z-0 opacity-20">
+                            {renderCardIllustration(blog.category)}
+                          </div>
+
+                          <div className="relative z-10 flex items-center justify-between">
+                            <span className="text-[10px] font-extrabold uppercase tracking-widest bg-white/20 backdrop-blur-md text-white border border-white/10 px-2.5 py-1 rounded-full">
+                              {blog.category}
+                            </span>
+                            <div className="flex items-center gap-1.5">
+                              <button 
+                                onClick={(e) => handleLike(blog.id, e)}
+                                className="w-8 h-8 rounded-lg bg-white/15 backdrop-blur-md border border-white/10 text-white flex items-center justify-center hover:bg-white/25 transition-all"
+                                title="Like guide"
+                              >
+                                <ThumbsUp className={`w-3.5 h-3.5 ${likedPosts[blog.id] ? "fill-white text-white" : ""}`} />
+                              </button>
+                              <button 
+                                onClick={(e) => copyToClipboard(blog.id, e)}
+                                className="w-8 h-8 rounded-lg bg-white/15 backdrop-blur-md border border-white/10 text-white flex items-center justify-center hover:bg-white/25 transition-all relative"
+                                title="Copy post link"
+                              >
+                                {copiedId === blog.id ? (
+                                  <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] px-2 py-0.5 rounded shadow-md whitespace-nowrap">Copied!</span>
+                                ) : null}
+                                <Share2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="relative z-10 flex items-center gap-3 text-white/95 text-xs">
+                            <div className="flex items-center gap-1">
+                              <Calendar className="w-3.5 h-3.5 text-white/80" />
+                              <span>{blog.date}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Clock className="w-3.5 h-3.5 text-white/80" />
+                              <span>{blog.readTime}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Article Text */}
+                        <div className="p-6 space-y-3">
+                          <h3 className="text-lg font-bold text-brand-text-dark group-hover:text-primary-blue transition-colors line-clamp-2 leading-snug">
+                            {blog.title}
+                          </h3>
+                          <p className="text-gray-500 text-xs sm:text-sm line-clamp-3 leading-relaxed">
+                            {blog.summary}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Card Footer */}
+                      <div className="px-6 pb-6 pt-4 border-t border-gray-50 flex items-center justify-between mt-auto">
+                        <div className="flex items-center gap-2">
+                          <img 
+                            src={blog.authorAvatar} 
+                            alt={blog.author} 
+                            className="w-7 h-7 rounded-full object-cover border border-gray-200" 
+                          />
+                          <span className="text-xs text-gray-500 font-medium truncate max-w-[120px]">{blog.author}</span>
+                        </div>
+
+                        <span className="text-xs font-bold text-primary-blue group-hover:text-accent-blue transition-colors flex items-center gap-1.5">
+                          Read Guide
+                          <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+                        </span>
+                      </div>
+                    </motion.article>
+                  ))}
+                </div>
+              ) : (
+                /* Empty Search State */
+                <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-gray-200 shadow-xs" id="blogs-empty-state">
+                  <FileText className="w-14 h-14 text-gray-300 mx-auto mb-4" />
+                  <h4 className="font-extrabold text-brand-text-dark text-lg">No blueprints found</h4>
+                  <p className="text-sm text-gray-400 max-w-sm mx-auto mt-2">
+                    We couldn't find any guides matching "{searchQuery}". Please try adjusting your search terms or choosing a category pill above.
+                  </p>
                   <button
-                    onClick={() => setActiveBlog(null)}
-                    className="bg-primary-blue hover:bg-primary-blue/90 text-white font-extrabold text-xs py-2 px-5 rounded-lg transition-all cursor-pointer"
+                    onClick={() => { setSearchQuery(""); setSelectedCategory("All"); }}
+                    className="mt-6 text-xs font-bold bg-primary-blue text-white px-5 py-2.5 rounded-xl hover:bg-primary-blue/90 transition-all cursor-pointer shadow-xs"
                   >
-                    Close Reader
+                    Reset Filters
                   </button>
                 </div>
-              </motion.div>
+              )}
+
+              {/* Premium News Letter Section */}
+              <div className="bg-brand-text-dark text-white rounded-3xl p-8 md:p-12 relative overflow-hidden shadow-xl" id="blog-newsletter">
+                <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-brand-text-dark to-primary-blue/10 z-0" />
+                
+                {/* Decorative absolute element */}
+                <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary-blue/10 rounded-full blur-3xl z-0" />
+
+                <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                  <div className="lg:col-span-7 space-y-4">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-primary-blue bg-primary-blue/20 border border-primary-blue/30 px-3 py-1 rounded-full inline-block">
+                      Vector Weekly Newsletter
+                    </span>
+                    <h2 className="text-2xl md:text-3.5xl font-black tracking-tight leading-tight">
+                      Get the technical print checklists, vector guides directly in your inbox.
+                    </h2>
+                    <p className="text-gray-400 text-sm md:text-base max-w-xl leading-relaxed">
+                      Zero spam. Just masterclass advice from industry-leading vector trace experts on how to make your brand assets flawlessly scale-free.
+                    </p>
+                  </div>
+
+                  <div className="lg:col-span-5">
+                    <AnimatePresence mode="wait">
+                      {!isSubscribed ? (
+                        <motion.form 
+                          key="newsletter-form"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          onSubmit={handleSubscribe} 
+                          className="flex flex-col sm:flex-row gap-2.5"
+                        >
+                          <input
+                            type="email"
+                            required
+                            placeholder="Enter your work email..."
+                            value={emailInput}
+                            onChange={(e) => setEmailInput(e.target.value)}
+                            className="flex-grow bg-white/10 text-white placeholder:text-gray-400 border border-white/15 px-4.5 py-3.5 rounded-xl text-sm focus:outline-none focus:border-primary-blue focus:ring-4 focus:ring-primary-blue/15 transition-all"
+                          />
+                          <button
+                            type="submit"
+                            className="bg-primary-blue hover:bg-accent-blue text-white font-extrabold text-sm px-6 py-3.5 rounded-xl shadow-lg shadow-primary-blue/15 hover:shadow-primary-blue/25 transition-all whitespace-nowrap cursor-pointer"
+                          >
+                            Join Free
+                          </button>
+                        </motion.form>
+                      ) : (
+                        <motion.div 
+                          key="newsletter-success"
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="bg-primary-blue/15 border border-primary-blue/30 p-6 rounded-2xl flex items-start gap-4"
+                        >
+                          <CheckCircle2 className="w-6 h-6 text-primary-blue shrink-0 mt-0.5" />
+                          <div>
+                            <h4 className="font-bold text-white text-base">You're in the Loop!</h4>
+                            <p className="text-xs text-gray-300 mt-1 leading-relaxed">
+                              Welcome to the Vector weekly insights. Keep an eye on your inbox for our curated templates and technical print rules.
+                            </p>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </div>
+              </div>
+
+            </motion.div>
+          ) : (
+            /* ========================================================================= */
+            /* 2. DEDICATED FULL-PAGE ARTICLE READING VIEW                               */
+            /* ========================================================================= */
+            <motion.div
+              key="blog-article-reader"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 30 }}
+              transition={{ duration: 0.4 }}
+              className="space-y-10"
+              id="full-article-view"
+            >
+              {/* Floating Action Header Bar */}
+              <div className="flex items-center justify-between pb-4 border-b border-gray-200">
+                <button
+                  onClick={() => setActiveBlog(null)}
+                  className="flex items-center gap-2 text-xs font-bold text-gray-600 hover:text-primary-blue bg-white px-4 py-2.5 rounded-xl border border-gray-100 hover:border-primary-blue/30 shadow-xs hover:shadow-sm transition-all cursor-pointer"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Back to Insights
+                </button>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={(e) => handleLike(activeBlog.id, e)}
+                    className="flex items-center gap-1.5 text-xs font-bold bg-white px-4 py-2.5 rounded-xl border border-gray-100 hover:border-rose-500/30 text-gray-600 hover:text-rose-500 shadow-xs transition-all cursor-pointer"
+                  >
+                    <ThumbsUp className={`w-4 h-4 ${likedPosts[activeBlog.id] ? "fill-rose-500 text-rose-500" : ""}`} />
+                    <span>{likedPosts[activeBlog.id] ? "Liked" : "Helpful"}</span>
+                  </button>
+                  <button
+                    onClick={(e) => copyToClipboard(activeBlog.id, e)}
+                    className="flex items-center gap-1.5 text-xs font-bold bg-white px-4 py-2.5 rounded-xl border border-gray-100 hover:border-primary-blue/30 text-gray-600 hover:text-primary-blue shadow-xs transition-all relative cursor-pointer"
+                  >
+                    {copiedId === activeBlog.id ? (
+                      <span className="absolute -top-9 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] px-2.5 py-1 rounded shadow-md">Copied Link!</span>
+                    ) : null}
+                    <Share2 className="w-4 h-4" />
+                    <span>Share Link</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Article Main Layout Container */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                
+                {/* Left Side: Article Body content (Col span 8) */}
+                <article className="lg:col-span-8 bg-white rounded-3xl border border-gray-100 shadow-xs p-6 md:p-10 space-y-8">
+                  {/* Article metadata category & tags */}
+                  <div className="space-y-4">
+                    <span className="text-[10px] font-extrabold uppercase tracking-widest bg-primary-blue/10 text-primary-blue px-3 py-1.5 rounded-full inline-block">
+                      {activeBlog.category}
+                    </span>
+
+                    <h1 className="text-2.5xl md:text-4xl font-black text-brand-text-dark tracking-tight leading-tight">
+                      {activeBlog.title}
+                    </h1>
+
+                    <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-xs text-gray-400 pt-1">
+                      <div className="flex items-center gap-2">
+                        <img 
+                          src={activeBlog.authorAvatar} 
+                          alt={activeBlog.author} 
+                          className="w-8 h-8 rounded-full object-cover border border-gray-200" 
+                        />
+                        <div className="leading-tight">
+                          <p className="font-bold text-brand-text-dark">{activeBlog.author}</p>
+                          <p className="text-[10px] text-gray-400">{activeBlog.authorTitle}</p>
+                        </div>
+                      </div>
+                      <span className="hidden sm:inline">•</span>
+                      <span className="flex items-center gap-1"><Calendar className="w-4 h-4" />{activeBlog.date}</span>
+                      <span className="hidden sm:inline">•</span>
+                      <span className="flex items-center gap-1"><Clock className="w-4 h-4" />{activeBlog.readTime}</span>
+                    </div>
+                  </div>
+
+                  {/* Beautiful Unsplash Hero Image for active post */}
+                  <div className="h-48 md:h-80 rounded-2xl relative overflow-hidden shadow-sm">
+                    <img 
+                      src={activeBlog.heroImage} 
+                      alt={activeBlog.title} 
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                  </div>
+
+                  {/* Rich Formatted Article content (Editorial style) */}
+                  <div className="space-y-6 text-gray-600 text-sm sm:text-base leading-relaxed font-serif">
+                    {/* Introductory Lead Summary Paragraph */}
+                    <p className="text-lg sm:text-xl font-medium text-brand-text-dark/90 border-l-4 border-primary-blue pl-4 py-1 italic leading-relaxed font-sans">
+                      {activeBlog.summary}
+                    </p>
+
+                    {activeBlog.content.map((para, i) => {
+                      // Check if paragraph contains bold bullet points inside double stars
+                      if (para.includes("**")) {
+                        const parts = para.split("\n");
+                        return (
+                          <div key={i} className="space-y-4 font-sans pt-2">
+                            {parts.map((p, idx) => {
+                              if (p.startsWith("**")) {
+                                const cleanKey = p.substring(2, p.indexOf("**:"));
+                                const cleanText = p.substring(p.indexOf("**:") + 3);
+                                return (
+                                  <p key={idx} className="text-gray-700">
+                                    <strong className="text-brand-text-dark font-extrabold">{cleanKey}:</strong>{cleanText}
+                                  </p>
+                                );
+                              }
+                              return <p key={idx}>{p}</p>;
+                            })}
+                          </div>
+                        );
+                      }
+                      
+                      // Render standard paragraphs with elegant, natural font styling
+                      return (
+                        <p key={i} className="text-gray-700 leading-relaxed">
+                          {para}
+                        </p>
+                      );
+                    })}
+
+                    {/* Styled Editorial Blockquote */}
+                    <div className="bg-gray-50 border-l-4 border-primary-blue p-6 rounded-r-xl italic font-sans text-brand-text-dark text-sm sm:text-base leading-relaxed">
+                      "At Vector Trace Lab, our primary benchmark is zero-distortion vector recreation. Machines operate purely on contrast levels, but humans understand visual harmony. That is the fundamental divider between auto-trace and true manual craft."
+                    </div>
+                  </div>
+
+                  {/* Article footer author details and sign off */}
+                  <div className="pt-8 border-t border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+                    <div className="flex items-center gap-4">
+                      <img 
+                        src={activeBlog.authorAvatar} 
+                        alt={activeBlog.author} 
+                        className="w-12 h-12 rounded-full object-cover border-2 border-primary-blue/20" 
+                      />
+                      <div>
+                        <h4 className="font-bold text-brand-text-dark">{activeBlog.author}</h4>
+                        <p className="text-xs text-gray-400">{activeBlog.authorTitle} at Vector Lab</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {activeBlog.tags.map(tag => (
+                        <span key={tag} className="text-[11px] font-bold bg-gray-100 text-gray-500 px-3 py-1.5 rounded-lg">
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                </article>
+
+                {/* Right Side: Sidebar Navigation/Content Cards (Col span 4) */}
+                <div className="lg:col-span-4 space-y-8">
+                  
+                  {/* Related Posts Card */}
+                  <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-xs space-y-4">
+                    <h3 className="text-base font-bold text-brand-text-dark flex items-center gap-2 pb-2 border-b border-gray-100">
+                      <Compass className="w-5 h-5 text-primary-blue" />
+                      Related Blueprints
+                    </h3>
+                    <div className="space-y-4">
+                      {blogs
+                        .filter(b => b.id !== activeBlog.id)
+                        .slice(0, 3)
+                        .map(rel => (
+                          <div 
+                            key={rel.id}
+                            onClick={() => setActiveBlog(rel)}
+                            className="group flex gap-3 cursor-pointer items-start hover:bg-gray-50 p-2 rounded-xl transition-all duration-300"
+                          >
+                            <div className={`w-14 h-14 bg-gradient-to-br ${rel.imageGradient} rounded-lg shrink-0 relative overflow-hidden flex items-center justify-center text-white`}>
+                              <div className="absolute inset-0 opacity-15">
+                                {renderCardIllustration(rel.category)}
+                              </div>
+                              <span className="text-[9px] font-mono font-bold uppercase">LAB</span>
+                            </div>
+                            <div className="space-y-1">
+                              <h4 className="text-xs sm:text-sm font-bold text-brand-text-dark group-hover:text-primary-blue transition-colors line-clamp-2 leading-snug">
+                                {rel.title}
+                              </h4>
+                              <p className="text-[10px] text-gray-400 font-medium">
+                                {rel.category} • {rel.readTime}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+
+                  {/* Sidebar Newsletter box */}
+                  <div className="bg-slate-900 text-white rounded-3xl p-6 shadow-xs space-y-4 relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-br from-slate-900 to-indigo-950 z-0" />
+                    
+                    <div className="relative z-10 space-y-4">
+                      <div className="w-10 h-10 rounded-xl bg-primary-blue/20 flex items-center justify-center text-primary-blue">
+                        <Mail className="w-5 h-5" />
+                      </div>
+                      <h3 className="text-lg font-bold">Vector Lab Insider</h3>
+                      <p className="text-xs text-gray-400 leading-relaxed">
+                        Join 4,200+ design leads and manufacturers receiving weekly insights, templates, and high-performance raster-to-vector workflows.
+                      </p>
+
+                      <AnimatePresence mode="wait">
+                        {!isSubscribed ? (
+                          <form onSubmit={handleSubscribe} className="space-y-2">
+                            <input
+                              type="email"
+                              required
+                              placeholder="Your email address..."
+                              value={emailInput}
+                              onChange={(e) => setEmailInput(e.target.value)}
+                              className="w-full bg-white/10 text-white placeholder:text-gray-500 border border-white/10 px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:border-primary-blue focus:ring-2 focus:ring-primary-blue/10 transition-all"
+                            />
+                            <button
+                              type="submit"
+                              className="w-full bg-primary-blue hover:bg-accent-blue text-white font-extrabold text-xs py-2.5 rounded-xl transition-all cursor-pointer shadow-md shadow-primary-blue/10"
+                            >
+                              Subscribe Free
+                            </button>
+                          </form>
+                        ) : (
+                          <div className="bg-primary-blue/20 border border-primary-blue/30 p-4 rounded-xl text-xs flex items-start gap-2 text-white">
+                            <CheckCircle2 className="w-4 h-4 text-primary-blue shrink-0 mt-0.5" />
+                            <div>
+                              <p className="font-bold">Subscribed Successfully!</p>
+                              <p className="text-[10px] text-gray-300 mt-0.5">Welcome aboard.</p>
+                            </div>
+                          </div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  </div>
+
+                  {/* Custom Tracing Guarantee */}
+                  <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-xs text-center space-y-3">
+                    <div className="w-12 h-12 bg-primary-blue/10 text-primary-blue rounded-full mx-auto flex items-center justify-center">
+                      <Sparkles className="w-6 h-6 text-primary-blue" />
+                    </div>
+                    <h3 className="text-sm font-bold text-brand-text-dark">Need Vector Assistance?</h3>
+                    <p className="text-xs text-gray-500 leading-relaxed max-w-xs mx-auto">
+                      Have a fuzzy image, low-res artwork, or blueprint sketches? Get manual clean-ups from our experts with 100% precision.
+                    </p>
+                    <button
+                      onClick={() => {
+                        setActiveBlog(null);
+                        const el = document.getElementById("contact");
+                        if (el) el.scrollIntoView({ behavior: "smooth" });
+                      }}
+                      className="text-xs font-extrabold text-primary-blue hover:text-accent-blue transition-colors flex items-center justify-center gap-1 mx-auto cursor-pointer"
+                    >
+                      Request Free Quote
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                </div>
+
+              </div>
             </motion.div>
           )}
         </AnimatePresence>

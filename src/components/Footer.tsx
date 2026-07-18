@@ -1,5 +1,6 @@
 import React from "react";
 import { Shield, Mail, ArrowUp } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface FooterProps {
   onPageChange: (page: string) => void;
@@ -92,24 +93,24 @@ export default function Footer({ onPageChange, onServiceSelect }: FooterProps) {
             </h4>
             <ul className="space-y-2.5 text-sm">
               <li>
-                <a href="#portfolio" onClick={(e) => handleLinkClick(e, "portfolio")} className="hover:text-primary-blue transition-colors block">
+                <Link to="/portfolio" className="hover:text-primary-blue transition-colors block">
                   Portfolio
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#refund-policy" onClick={(e) => handleLinkClick(e, "refund-policy")} className="hover:text-primary-blue transition-colors block">
+                <Link to="/refund-policy" className="hover:text-primary-blue transition-colors block">
                   Refund & Cancellation Policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#terms-of-service" onClick={(e) => handleLinkClick(e, "terms-of-service")} className="hover:text-primary-blue transition-colors block">
+                <Link to="/terms" className="hover:text-primary-blue transition-colors block">
                   Terms of Service
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#privacy-policy" onClick={(e) => handleLinkClick(e, "privacy-policy")} className="hover:text-primary-blue transition-colors block">
+                <Link to="/privacy-policy" className="hover:text-primary-blue transition-colors block">
                   Privacy Policy
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -136,7 +137,7 @@ export default function Footer({ onPageChange, onServiceSelect }: FooterProps) {
         {/* Bottom copyright line */}
         <div className="mt-16 pt-8 border-t border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4" id="footer-bottom-bar">
           <p className="text-xs text-gray-400 text-center sm:text-left">
-            &copy; {new Date().getFullYear()} Vector Lab Inc. All rights reserved. Traced by hand in the USA.
+            &copy; {new Date().getFullYear()} Vector Lab (Vector Trace Lab). All rights reserved.
           </p>
 
           <div className="flex items-center gap-6 text-xs text-gray-400">
