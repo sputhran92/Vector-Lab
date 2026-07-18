@@ -114,13 +114,25 @@ export default function Contact({ prefilledService, prefilledPlan }: ContactProp
       });
  
       if (!response.ok) {
-        throw new Error("Failed to send email");
+        let serverError = "";
+        try {
+          const errJson = await response.json();
+          if (errJson && errJson.error) {
+            serverError = errJson.error;
+          }
+        } catch (_) {}
+        throw new Error(serverError || "Failed to send email");
       }
        
       setSubmitSuccess(true);
     } catch (error: any) {
       console.error("Error submitting form:", error);
-      setSubmitError("Failed to send message. Please try again or email us directly at info@vectortracelab.com");
+      const msg = error.message || "";
+      if (msg.includes("not configured")) {
+        setSubmitError("The email service is not configured on this server environment. Please define SMTP_USER and SMTP_PASS variables.");
+      } else {
+        setSubmitError(`Failed to send message (${msg || "Server Error"}). Please try again or email us directly at info@vectortracelab.com`);
+      }
     } finally {
       setIsSubmitting(false);
     }
