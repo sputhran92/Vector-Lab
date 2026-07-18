@@ -16,6 +16,62 @@ async function startServer() {
 
   app.use(express.json());
 
+  // Diagnostic API route for verifying SMTP setup
+  app.get("/api/debug-smtp", async (req, res) => {
+    const smtpHost = process.env.SMTP_HOST || "smtp.gmail.com";
+    const smtpPort = Number(process.env.SMTP_PORT) || 587;
+    const isSecure = smtpPort === 465;
+
+    const diagnostics = {
+      smtp_host: smtpHost,
+      smtp_port: smtpPort,
+      smtp_user_exists: !!process.env.SMTP_USER,
+      smtp_user_length: process.env.SMTP_USER ? process.env.SMTP_USER.length : 0,
+      smtp_pass_exists: !!process.env.SMTP_PASS,
+      smtp_pass_length: process.env.SMTP_PASS ? process.env.SMTP_PASS.length : 0,
+      smtp_from: process.env.SMTP_FROM || "(using user)",
+      contact_receiver_email: process.env.CONTACT_RECEIVER_EMAIL || "(using default)",
+      node_env: process.env.NODE_ENV || "unknown"
+    };
+
+    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+      return res.status(500).json({
+        status: "failed",
+        message: "SMTP_USER or SMTP_PASS is missing in this container environment.",
+        diagnostics
+      });
+    }
+
+    try {
+      const transporter = nodemailer.createTransport({
+        host: smtpHost,
+        port: smtpPort,
+        secure: isSecure,
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+        tls: {
+          rejectUnauthorized: false
+        }
+      });
+
+      await transporter.verify();
+      return res.json({
+        status: "success",
+        message: "SMTP connection verified successfully!",
+        diagnostics
+      });
+    } catch (error: any) {
+      return res.status(500).json({
+        status: "failed",
+        error_message: error.message || "Unknown SMTP verify error",
+        error_code: error.code || "unknown",
+        diagnostics
+      });
+    }
+  });
+
   // API routes
   app.post("/api/contact", upload.array("files"), async (req, res) => {
     const { name, email, message, projectType } = req.body;
