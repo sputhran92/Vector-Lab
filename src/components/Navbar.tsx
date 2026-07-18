@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Menu, X, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useNavigate, useLocation } from "react-router-dom";
-import logoImg from "../assets/images/vector_trace_lab_logo_1784371213382.jpg";
+const logoImg = "https://lh3.googleusercontent.com/d/1Q5rHV8Mt_JAdMgvXmjn6084bNfL13lpN";
 
 interface NavbarProps {
   currentPage: string;
@@ -73,11 +73,11 @@ export default function Navbar({ currentPage, onPageChange, onQuoteClick }: Navb
             className="flex items-center gap-2.5 text-primary-blue font-bold text-2xl tracking-tight select-none"
             id="nav-logo"
           >
-            <div className="w-9 h-9 rounded-xl overflow-hidden shadow-sm flex items-center justify-center border border-gray-100 bg-white">
+            <div className="w-12 h-12 rounded-xl overflow-hidden shadow-sm flex items-center justify-center border border-gray-100 bg-white p-0.5">
               <img 
                 src={logoImg} 
                 alt="Vector Trace Lab Logo" 
-                className="w-full h-full object-cover" 
+                className="w-full h-full object-contain" 
                 referrerPolicy="no-referrer"
               />
             </div>
