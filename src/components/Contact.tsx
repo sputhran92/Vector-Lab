@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Mail, Clock, CheckCircle2, ArrowRight, Copy, Check, FileText } from "lucide-react";
+import { Mail, Phone, Clock, CheckCircle2, ArrowRight, Copy, Check, FileText } from "lucide-react";
 import { motion } from "motion/react";
 
 interface ContactProps {
@@ -64,6 +64,18 @@ export default function Contact({ prefilledService, prefilledPlan }: ContactProp
                     <h4 className="font-extrabold text-brand-text-dark text-sm">Direct Support Email</h4>
                     <p className="text-xs sm:text-sm text-primary-blue hover:underline">
                       <a href="mailto:info@vectortracelab.com">info@vectortracelab.com</a>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-lg bg-primary-blue/5 text-primary-blue flex items-center justify-center flex-shrink-0">
+                    <Phone className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-extrabold text-brand-text-dark text-sm">Phone Support</h4>
+                    <p className="text-xs sm:text-sm text-primary-blue hover:underline">
+                      <a href="tel:+14692249456">+1 (469) 224-9456</a>
                     </p>
                   </div>
                 </div>

@@ -1,7 +1,7 @@
 import React from "react";
-import { Mail, ArrowUp } from "lucide-react";
+import { Mail, ArrowUp, Phone } from "lucide-react";
 import { Link } from "react-router-dom";
-const logoImg = "https://lh3.googleusercontent.com/d/1Q5rHV8Mt_JAdMgvXmjn6084bNfL13lpN";
+const logoImg = "https://lh3.googleusercontent.com/d/1skSSg47Q4aQ1Dhvsm0TfyXJgOGIRxheJ";
 
 interface FooterProps {
   onPageChange: (page: string) => void;
@@ -135,6 +135,14 @@ export default function Footer({ onPageChange, onServiceSelect }: FooterProps) {
                   </a>
                 </span>
               </li>
+              <li className="flex items-center gap-2">
+                <Phone className="w-4 h-4 text-primary-blue flex-shrink-0" />
+                <span className="text-sm">
+                  <a href="tel:+14692249456" className="hover:text-primary-blue transition-colors text-sm" style={{ fontSize: "14px" }}>
+                    +1 (469) 224-9456
+                  </a>
+                </span>
+              </li>
             </ul>
           </div>
 
@@ -143,7 +151,7 @@ export default function Footer({ onPageChange, onServiceSelect }: FooterProps) {
         {/* Bottom copyright line */}
         <div className="mt-16 pt-8 border-t border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4" id="footer-bottom-bar">
           <p className="text-xs text-gray-400 text-center sm:text-left">
-            &copy; {new Date().getFullYear()} Vector Lab (Vector Trace Lab). All rights reserved.
+            &copy; 2016 Vector Lab (Vector Trace Lab). All rights reserved.
           </p>
 
           <div className="flex items-center gap-6 text-xs text-gray-400">

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Menu, X, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useNavigate, useLocation } from "react-router-dom";
-const logoImg = "https://lh3.googleusercontent.com/d/1Q5rHV8Mt_JAdMgvXmjn6084bNfL13lpN";
+const logoImg = "https://lh3.googleusercontent.com/d/1skSSg47Q4aQ1Dhvsm0TfyXJgOGIRxheJ";
 
 interface NavbarProps {
   currentPage: string;
@@ -81,10 +81,9 @@ export default function Navbar({ currentPage, onPageChange, onQuoteClick }: Navb
                 referrerPolicy="no-referrer"
               />
             </div>
-            <span className="text-brand-text-dark font-extrabold flex items-center gap-1.5">
+            <span className="text-brand-text-dark font-extrabold flex items-center gap-1">
               <span className="text-gray-900">Vector</span>
-              <span className="text-primary-blue">Trace</span>
-              <span className="text-gray-900">Lab</span>
+              <span className="text-primary-blue">Lab</span>
             </span>
           </a>
 

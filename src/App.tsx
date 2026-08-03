@@ -13,6 +13,7 @@ import PrivacyPolicy from "./components/PrivacyPolicy";
 import Pricing from "./components/Pricing";
 import Testimonials from "./components/Testimonials";
 import FAQ from "./components/FAQ";
+import PreferredSupplier from "./components/PreferredSupplier";
 import Contact from "./components/Contact";
 import Blogs from "./components/Blogs";
 import Footer from "./components/Footer";
@@ -91,6 +92,9 @@ function AppContent() {
                     onQuoteClick={handleQuoteClick}
                     onPortfolioClick={handlePortfolioClick}
                   />
+
+                  {/* Preferred Supplier Section */}
+                  <PreferredSupplier />
 
                   {/* 4. Why Choose Us / Features */}
                   <Features />
