@@ -21,44 +21,44 @@ export default function FeaturedPortfolio({ onPortfolioClick }: FeaturedPortfoli
     {
       id: "drive-sync-01",
       src: "https://lh3.googleusercontent.com/d/1-50hbklAoHSsct9MBx0QTTwldFuvofmq",
-      title: "Sync Logo Design",
-      project: "Sync Branding",
-      description: "Modern geometric vector tracing of the Sync company mark with clean corporate shapes."
+      title: "Sync Logo Vector Tracing",
+      project: "SYNC",
+      description: "Recreated the Sync logo as a clean, fully editable vector while preserving the original design, spacing, and typography."
     },
     {
       id: "drive-portfolio-01",
       src: "https://lh3.googleusercontent.com/d/10bXsA4ji8Ub-U5YkfEJoz4un3eKwFnIW",
-      title: "Creative Art Emblem",
-      project: "Vibrant Art Portfolio",
-      description: "Detailed vector trace of custom artwork displaying vivid colors and ultra-precise gradients."
+      title: "Acacia Building Co. Logo Recreation",
+      project: "ACACIA BUILDING CO.",
+      description: "Converted the supplied logo artwork into a high-quality vector format with crisp lines, scalable shapes, and editable text."
     },
     {
       id: "drive-portfolio-02",
       src: "https://lh3.googleusercontent.com/d/1E0FEtlZVJ8gD2RdJitcnT_VoGhvC8MLM",
-      title: "Modern Crest Design",
-      project: "Corporate Identity",
-      description: "Stunning vector reconstruction of a professional crest with crisp, perfect curves."
+      title: "Sports Event Logo Vectorization",
+      project: "HIT IT & WIN IT",
+      description: "Precisely recreated this detailed event logo with clean curves, accurate colors, and print-ready vector artwork."
     },
     {
       id: "drive-portfolio-03",
       src: "https://lh3.googleusercontent.com/d/1zkPvcP3CxtEVen2z429TdQicwQpytqi9",
-      title: "Dynamic Sports Mascot",
-      project: "Athletics Division",
-      description: "A high-intensity mascot badge traced perfectly to serve as scalable tournament merchandise."
+      title: "Chiropractic Logo Redraw",
+      project: "Personal Best Chiropractic",
+      description: "Carefully traced and rebuilt the logo into a scalable vector suitable for signage, apparel, and marketing materials."
     },
     {
       id: "drive-portfolio-04",
       src: "https://lh3.googleusercontent.com/d/1S8IiOa2wA39IvEfcf4Zdv_z0Oi51bAjc",
-      title: "Sleek Brand Monogram",
-      project: "Luxury Apparel",
-      description: "Tracing of an elegant premium fashion monogram with pristine typographic details."
+      title: "Event Logo Vector Conversion",
+      project: "Cars & Coffee",
+      description: "Converted a detailed event logo into professional vector artwork while maintaining every illustration and typography detail."
     },
     {
       id: "drive-portfolio-16",
       src: "https://lh3.googleusercontent.com/d/18pZ28a2B1wMPj8azMC95mYR7M7aIrRjl",
-      title: "Compass Adventure Mark",
-      project: "Outdoor Gear",
-      description: "Stylized nautical compass logo trace showcasing beautiful geometric linework and rugged details."
+      title: "School Crest Vector Recreation",
+      project: "Caroline Sibley Elementary School",
+      description: "Recreated a complex school emblem into a fully editable vector with sharp details, balanced typography, and print-ready quality."
     }
   ];
 

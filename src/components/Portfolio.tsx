@@ -29,47 +29,47 @@ export default function Portfolio() {
     {
       id: "drive-sync-01",
       src: "https://lh3.googleusercontent.com/d/1-50hbklAoHSsct9MBx0QTTwldFuvofmq",
-      title: "Sync Logo Design",
+      title: "Sync Logo Vector Tracing",
       type: "Traced Vector",
-      project: "Sync Branding",
+      project: "SYNC",
       badgeColor: "bg-green-50 text-green-700 border-green-100",
-      description: "Modern geometric vector tracing of the Sync company mark with clean corporate shapes."
+      description: "Recreated the Sync logo as a clean, fully editable vector while preserving the original design, spacing, and typography."
     },
     {
       id: "drive-portfolio-01",
       src: "https://lh3.googleusercontent.com/d/10bXsA4ji8Ub-U5YkfEJoz4un3eKwFnIW",
-      title: "Creative Art Emblem",
+      title: "Acacia Building Co. Logo Recreation",
       type: "Traced Vector",
-      project: "Vibrant Art Portfolio",
+      project: "ACACIA BUILDING CO.",
       badgeColor: "bg-green-50 text-green-700 border-green-100",
-      description: "Detailed vector trace of custom artwork displaying vivid colors and ultra-precise gradients."
+      description: "Converted the supplied logo artwork into a high-quality vector format with crisp lines, scalable shapes, and editable text."
     },
     {
       id: "drive-portfolio-02",
       src: "https://lh3.googleusercontent.com/d/147DXgEtNhmXqVrrr-E2evjdWRx-CH6cd",
-      title: "Modern Crest Design",
+      title: "Sports Event Logo Vectorization",
       type: "Traced Vector",
-      project: "Corporate Identity",
+      project: "HIT IT & WIN IT",
       badgeColor: "bg-green-50 text-green-700 border-green-100",
-      description: "Stunning vector reconstruction of a professional crest with crisp, perfect curves."
+      description: "Precisely recreated this detailed event logo with clean curves, accurate colors, and print-ready vector artwork."
     },
     {
       id: "drive-portfolio-03",
       src: "https://lh3.googleusercontent.com/d/14WE-VrL5YYJUXrj5wvuCovUZFej93ehc",
-      title: "Dynamic Sports Mascot",
+      title: "Chiropractic Logo Redraw",
       type: "Traced Vector",
-      project: "Athletics Division",
+      project: "Personal Best Chiropractic",
       badgeColor: "bg-green-50 text-green-700 border-green-100",
-      description: "A high-intensity mascot badge traced perfectly to serve as scalable tournament merchandise."
+      description: "Carefully traced and rebuilt the logo into a scalable vector suitable for signage, apparel, and marketing materials."
     },
     {
       id: "drive-portfolio-04",
       src: "https://lh3.googleusercontent.com/d/16HO-t2MmNnKls0W_ewuqISaTXolKUXWV",
-      title: "Sleek Brand Monogram",
+      title: "Event Logo Vector Conversion",
       type: "Traced Vector",
-      project: "Luxury Apparel",
+      project: "Cars & Coffee",
       badgeColor: "bg-green-50 text-green-700 border-green-100",
-      description: "Tracing of an elegant premium fashion monogram with pristine typographic details."
+      description: "Converted a detailed event logo into professional vector artwork while maintaining every illustration and typography detail."
     },
     {
       id: "drive-logo-01-3",

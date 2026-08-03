@@ -93,9 +93,6 @@ function AppContent() {
                     onPortfolioClick={handlePortfolioClick}
                   />
 
-                  {/* Preferred Supplier Section */}
-                  <PreferredSupplier />
-
                   {/* 4. Why Choose Us / Features */}
                   <Features />
 
@@ -108,14 +105,17 @@ function AppContent() {
                   {/* 7. Pricing Section */}
                   <Pricing onPlanSelect={handlePlanSelect} />
 
-                  {/* 8. Testimonials */}
-                  <Testimonials />
+                  {/* Preferred Supplier Section */}
+                  <PreferredSupplier />
 
                   {/* 10. Contact / Quote Form */}
                   <Contact
                     prefilledService={prefilledService}
                     prefilledPlan={prefilledPlan}
                   />
+
+                  {/* 8. Testimonials */}
+                  <Testimonials />
                 </>
               )}
 
