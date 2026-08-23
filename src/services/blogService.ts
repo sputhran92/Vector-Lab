@@ -2,26 +2,102 @@ import { BlogPost } from "../types";
 import { blogs as defaultBlogs } from "../data/blogsData";
 import mammoth from "mammoth";
 
-const STORAGE_KEY = "vector_lab_custom_blogs_v1";
+const STORAGE_KEY = "vector_lab_custom_blogs_v2";
+const LEGACY_STORAGE_KEY = "vector_lab_custom_blogs_v1";
 const EVENT_NAME = "vector_lab_blogs_changed";
 
+let cachedBlogs: BlogPost[] = [];
+
 /**
- * Initialize and get all blogs from localStorage or default dataset
+ * Initialize cache from local storage or defaults
  */
-export function getAllBlogs(includeDrafts = false): BlogPost[] {
+function initCachedBlogs(): BlogPost[] {
+  if (cachedBlogs.length > 0) return cachedBlogs;
+
   try {
+    // Check current versioned storage
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      // Seed initial defaults
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultBlogs));
-      return defaultBlogs.filter(b => includeDrafts || b.status !== "draft");
+    if (raw) {
+      const parsed: BlogPost[] = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        cachedBlogs = parsed;
+        return parsed;
+      }
     }
-    const parsed: BlogPost[] = JSON.parse(raw);
-    return parsed.filter(b => includeDrafts || b.status !== "draft");
-  } catch (err) {
-    console.error("Error reading blogs from localStorage:", err);
+
+    // Check legacy storage and migrate if valid
+    const legacyRaw = localStorage.getItem(LEGACY_STORAGE_KEY);
+    if (legacyRaw) {
+      try {
+        const legacyParsed: BlogPost[] = JSON.parse(legacyRaw);
+        if (Array.isArray(legacyParsed) && legacyParsed.length > 0) {
+          // If defaultBlogs had edits, prefer defaultBlogs for seeded posts and keep custom ones
+          const customPosts = legacyParsed.filter(
+            lp => !defaultBlogs.some(db => db.id.toLowerCase() === lp.id.toLowerCase())
+          );
+          const merged = [...defaultBlogs, ...customPosts];
+          cachedBlogs = merged;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+          localStorage.removeItem(LEGACY_STORAGE_KEY);
+          return merged;
+        }
+      } catch {}
+    }
+
+    // Default to seeded dataset
+    cachedBlogs = [...defaultBlogs];
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultBlogs));
+    return defaultBlogs;
+  } catch {
+    cachedBlogs = [...defaultBlogs];
     return defaultBlogs;
   }
+}
+
+/**
+ * Synchronize blogs from server API and update local cache
+ */
+export async function syncBlogsFromServer(): Promise<BlogPost[]> {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+    const res = await fetch("/api/blogs?all=true", { signal: controller.signal });
+    clearTimeout(timeoutId);
+
+    if (res.ok) {
+      const serverBlogs: BlogPost[] = await res.json();
+      if (Array.isArray(serverBlogs) && serverBlogs.length > 0) {
+        cachedBlogs = serverBlogs;
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(serverBlogs));
+        } catch {}
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent(EVENT_NAME, { detail: serverBlogs }));
+        }
+        return serverBlogs;
+      }
+    }
+  } catch (err) {
+    // Fallback to local
+  }
+  return getAllBlogs(true);
+}
+
+// Auto-run initial background sync on script load in browser
+if (typeof window !== "undefined") {
+  initCachedBlogs();
+  setTimeout(() => {
+    syncBlogsFromServer();
+  }, 100);
+}
+
+/**
+ * Initialize and get all blogs from cache/localStorage or default dataset
+ */
+export function getAllBlogs(includeDrafts = false): BlogPost[] {
+  const blogs = initCachedBlogs();
+  return blogs.filter(b => includeDrafts || b.status !== "draft");
 }
 
 /**
@@ -35,11 +111,8 @@ export function getBlogById(id: string, includeDrafts = true): BlogPost | undefi
 /**
  * Save or update a blog post
  */
-export function saveBlog(blog: BlogPost): { success: boolean; error?: string } {
+export async function saveBlogAsync(blog: BlogPost): Promise<{ success: boolean; error?: string }> {
   try {
-    const all = getAllBlogs(true);
-    const existingIndex = all.findIndex(b => b.id.toLowerCase() === blog.id.toLowerCase());
-
     const enrichedBlog: BlogPost = {
       ...blog,
       updatedAt: new Date().toISOString(),
@@ -48,15 +121,30 @@ export function saveBlog(blog: BlogPost): { success: boolean; error?: string } {
       readTime: blog.readTime || calculateReadTime(blog.content),
     };
 
+    // Update in-memory & local cache immediately
+    const all = [...initCachedBlogs()];
+    const existingIndex = all.findIndex(b => b.id.toLowerCase() === blog.id.toLowerCase());
     if (existingIndex >= 0) {
       all[existingIndex] = enrichedBlog;
     } else {
-      // Prepend newly created blog to top
       all.unshift(enrichedBlog);
     }
+    cachedBlogs = all;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+    } catch {}
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
-    window.dispatchEvent(new CustomEvent(EVENT_NAME, { detail: enrichedBlog }));
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent(EVENT_NAME, { detail: enrichedBlog }));
+    }
+
+    // Persist to server in background
+    fetch("/api/blogs", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(enrichedBlog),
+    }).catch(() => {});
+
     return { success: true };
   } catch (err: any) {
     console.error("Failed to save blog:", err);
@@ -65,19 +153,39 @@ export function saveBlog(blog: BlogPost): { success: boolean; error?: string } {
 }
 
 /**
+ * Synchronous save for immediate handler compatibility
+ */
+export function saveBlog(blog: BlogPost): { success: boolean; error?: string } {
+  saveBlogAsync(blog);
+  return { success: true };
+}
+
+/**
  * Delete a blog post
  */
-export function deleteBlog(id: string): boolean {
+export async function deleteBlogAsync(id: string): Promise<boolean> {
   try {
-    const all = getAllBlogs(true);
-    const filtered = all.filter(b => b.id.toLowerCase() !== id.toLowerCase());
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
-    window.dispatchEvent(new CustomEvent(EVENT_NAME));
+    const all = initCachedBlogs().filter(b => b.id.toLowerCase() !== id.toLowerCase());
+    cachedBlogs = all;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+    } catch {}
+
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent(EVENT_NAME));
+    }
+
+    fetch(`/api/blogs/${encodeURIComponent(id)}`, { method: "DELETE" }).catch(() => {});
     return true;
   } catch (err) {
     console.error("Failed to delete blog:", err);
     return false;
   }
+}
+
+export function deleteBlog(id: string): boolean {
+  deleteBlogAsync(id);
+  return true;
 }
 
 /**
@@ -104,9 +212,20 @@ export function duplicateBlog(id: string): BlogPost | null {
 /**
  * Reset back to initial curated blog dataset
  */
-export function resetBlogsToDefault(): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultBlogs));
-  window.dispatchEvent(new CustomEvent(EVENT_NAME));
+export async function resetBlogsToDefault(): Promise<void> {
+  cachedBlogs = [...defaultBlogs];
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultBlogs));
+    localStorage.removeItem(LEGACY_STORAGE_KEY);
+  } catch {}
+
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent(EVENT_NAME));
+  }
+
+  try {
+    await fetch("/api/blogs/reset", { method: "POST" });
+  } catch {}
 }
 
 /**
@@ -126,14 +245,28 @@ export function exportBlogsJSON(): void {
 /**
  * Import blogs from JSON file string
  */
-export function importBlogsJSON(jsonString: string): { success: boolean; count: number; error?: string } {
+export async function importBlogsJSON(jsonString: string): Promise<{ success: boolean; count: number; error?: string }> {
   try {
     const parsed = JSON.parse(jsonString);
     if (!Array.isArray(parsed)) {
       return { success: false, count: 0, error: "Uploaded file is not a valid blogs array JSON." };
     }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
-    window.dispatchEvent(new CustomEvent(EVENT_NAME));
+
+    cachedBlogs = parsed;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+    } catch {}
+
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent(EVENT_NAME));
+    }
+
+    fetch("/api/blogs/import", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ blogs: parsed }),
+    }).catch(() => {});
+
     return { success: true, count: parsed.length };
   } catch (err: any) {
     return { success: false, count: 0, error: err.message || "Failed to parse JSON" };
@@ -165,7 +298,7 @@ export function slugify(text: string): string {
 }
 
 /**
- * Parse a uploaded .docx File using mammoth into structured blog paragraphs & headings
+ * Parse an uploaded .docx File using mammoth into structured blog paragraphs & headings
  */
 export async function parseDocxFile(file: File): Promise<{
   title?: string;
@@ -207,7 +340,7 @@ export async function parseDocxFile(file: File): Promise<{
     } else if (tagName === "h3" || tagName === "h4") {
       paragraphs.push(`### ${text}`);
     } else if (tagName === "ul" || tagName === "ol") {
-      const items = Array.from(el.querySelectorAll("li")).map(li => `● ${li.textContent?.trim()}`);
+      const items = Array.from(el.querySelectorAll("li")).map((li) => `● ${li.textContent?.trim()}`);
       if (items.length > 0) {
         paragraphs.push(items.join("\n"));
       }
@@ -217,7 +350,7 @@ export async function parseDocxFile(file: File): Promise<{
       if (rows.length > 0) {
         const tableLines: string[] = [];
         rows.forEach((r, rIdx) => {
-          const cells = Array.from(r.querySelectorAll("th, td")).map(c => c.textContent?.trim() || "");
+          const cells = Array.from(r.querySelectorAll("th, td")).map((c) => c.textContent?.trim() || "");
           tableLines.push(`| ${cells.join(" | ")} |`);
           if (rIdx === 0) {
             tableLines.push(`| ${cells.map(() => "---").join(" | ")} |`);
@@ -237,7 +370,7 @@ export async function parseDocxFile(file: File): Promise<{
   // If HTML extraction yielded very few items, fallback to raw text lines
   if (paragraphs.length === 0) {
     const rawResult = await mammoth.extractRawText({ arrayBuffer });
-    const lines = rawResult.value.split(/\n\n+/).map(l => l.trim()).filter(Boolean);
+    const lines = rawResult.value.split(/\n\n+/).map((l) => l.trim()).filter(Boolean);
     return {
       title: lines[0] || file.name.replace(/\.[^/.]+$/, ""),
       paragraphs: lines,

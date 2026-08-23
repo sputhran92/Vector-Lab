@@ -66,9 +66,9 @@ export default function AdminSettings() {
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       const content = event.target?.result as string;
-      const res = importBlogsJSON(content);
+      const res = await importBlogsJSON(content);
       if (res.success) {
         setImportStatus(`Successfully restored ${res.count} blog posts from backup!`);
       } else {
@@ -78,8 +78,8 @@ export default function AdminSettings() {
     reader.readAsText(file);
   };
 
-  const handleReset = () => {
-    resetBlogsToDefault();
+  const handleReset = async () => {
+    await resetBlogsToDefault();
     setShowResetConfirm(false);
     setImportStatus("All blogs have been reset to factory default state.");
   };

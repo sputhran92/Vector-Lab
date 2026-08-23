@@ -22,7 +22,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { useParams, useNavigate } from "react-router-dom";
 
 import { BlogPost } from "../types";
-import { getAllBlogs, getBlogById } from "../services/blogService";
+import { getAllBlogs, getBlogById, syncBlogsFromServer } from "../services/blogService";
 
 export default function Blogs() {
   const { id } = useParams<{ id?: string }>();
@@ -43,6 +43,11 @@ export default function Blogs() {
 
   useEffect(() => {
     refreshBlogsList();
+    syncBlogsFromServer().then((latest) => {
+      if (latest && latest.length > 0) {
+        setAllBlogs(latest.filter(b => b.status !== "draft"));
+      }
+    });
     window.addEventListener("vector_lab_blogs_changed", refreshBlogsList);
     return () => window.removeEventListener("vector_lab_blogs_changed", refreshBlogsList);
   }, []);

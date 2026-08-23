@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { BlogPost } from "../../types";
 import { AdminTab } from "./AdminLayout";
-import { getAllBlogs, deleteBlog, duplicateBlog } from "../../services/blogService";
+import { getAllBlogs, deleteBlog, duplicateBlog, syncBlogsFromServer } from "../../services/blogService";
 
 interface AdminBlogListProps {
   onNavigate: (tab: AdminTab, blogId?: string) => void;
@@ -37,6 +37,11 @@ export default function AdminBlogList({ onNavigate }: AdminBlogListProps) {
 
   useEffect(() => {
     refreshBlogs();
+    syncBlogsFromServer().then((latest) => {
+      if (latest && latest.length > 0) {
+        setBlogs(latest);
+      }
+    });
     window.addEventListener("vector_lab_blogs_changed", refreshBlogs);
     return () => window.removeEventListener("vector_lab_blogs_changed", refreshBlogs);
   }, []);
