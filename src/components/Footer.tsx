@@ -163,6 +163,9 @@ export default function Footer({ onPageChange, onServiceSelect }: FooterProps) {
           </p>
 
           <div className="flex items-center gap-6 text-xs text-gray-400">
+            <Link to="/admin" className="text-gray-400 hover:text-primary-blue transition-colors flex items-center gap-1 text-[11px]">
+              <span>Admin Portal</span>
+            </Link>
             
             {/* Scroll back to top button */}
             <button

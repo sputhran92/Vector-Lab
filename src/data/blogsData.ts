@@ -1,20 +1,47 @@
-export interface BlogPost {
-  id: string;
-  title: string;
-  summary: string;
-  category: "Branding" | "Apparel" | "Fabrication" | "Vector Basics";
-  author: string;
-  authorTitle: string;
-  authorAvatar: string;
-  date: string;
-  readTime: string;
-  content: string[];
-  imageGradient: string;
-  tags: string[];
-  heroImage: string;
-}
+import { BlogPost } from "../types";
+
+export type { BlogPost };
 
 export const blogs: BlogPost[] = [
+  {
+    id: "graphic-file-formats-distributors",
+    title: "What Every Promotional Product Distributor Needs to Know About Graphic File Formats",
+    summary: "If you've ever had a supplier reject your client's logo, or spent hours trying to figure out why a downloaded file won't work for printing, here is the essential guide to graphic file formats for promotional product distributors.",
+    category: "Vector Basics",
+    author: "Shailesh",
+    authorTitle: "Founder & Lead Vector Specialist",
+    authorAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80",
+    date: "August 22, 2026",
+    readTime: "9 min read",
+    imageGradient: "from-blue-600 to-indigo-700",
+    tags: ["Distributors", "File Formats", "Vector vs Raster", "Print Production", "EPS & AI"],
+    heroImage: "https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&w=1200&q=80",
+    content: [
+      "If you've ever had a supplier reject your client's logo, or spent hours trying to figure out why a \"high-quality\" file you downloaded won't work for printing, you're not alone. Most promotional product distributors struggle with graphic file formats, not because they're careless, but because no one ever explained what these formats actually mean and why they matter.",
+      "Let's fix that right now.",
+      "### The Two Families: Raster vs. Vector\nBefore we dive into specific file formats, you need to understand the fundamental difference between raster and vector graphics. This is the single most important concept in print production.",
+      "### Raster Images (Made of Pixels)\nRaster images are made up of tiny coloured squares called pixels. Think of them like a mosaic, when you zoom in far enough, you can see the individual tiles.\n\n**Common raster formats**: JPG, PNG, GIF, BMP, TIFF\n**Best for**: Photographs, complex images with gradients and textures\n**The problem**: When you enlarge a raster image beyond its original size, it gets blurry and pixelated. That crisp logo on a website? It's usually 72 DPI (dots per inch) perfect for screens, terrible for print. Most print applications need at least 300 DPI.",
+      "### Vector Images (Made of Math)\nVector images are made of mathematical paths and curves. Instead of storing thousands of pixels, they store instructions: \"Draw a blue circle here, a red line there.\" This means they can scale infinitely without losing quality.\n\n**Common vector formats**: AI, EPS, SVG, PDF (when created properly)\n**Best for**: Logos, text, illustrations, anything that needs to scale\n**The advantage**: A vector logo looks perfect whether it's on a business card or a billboard. This is why suppliers constantly ask for vector files.",
+      "### The File Format Breakdown\nNow let's talk about the specific formats you'll encounter daily:",
+      "**PNG (Portable Network Graphics)**\n**Type**: Raster\n**When suppliers want it**: DTF (Direct-to-Film) printing, digital printing on certain substrates\n**The catch**: PNG files can have transparent backgrounds, which is great but they're still raster. If the original PNG is low resolution, transparency won't save it.\n**Distributor mistake**: Assuming any PNG with a transparent background will work. Resolution still matters.",
+      "**PDF (Portable Document Format)**\n**Type**: Can be raster, vector, or BOTH\n**The confusion**: This is where distributors get tripped up. A PDF can contain a vector logo, a raster image, or a combination of both. Just because a file is saved as a PDF doesn't mean it's print-ready.\n**How to tell**: If you open a PDF in Adobe Acrobat and zoom in to 400%, does the logo stay crisp? If yes, it's likely vector. If it gets blurry, it's raster.\n**When suppliers want it**: Almost always, but they're assuming it's a vector PDF.",
+      "**EPS (Encapsulated PostScript)**\n**Type**: Usually vector, but (surprise!) can also be raster\n**When suppliers want it**: Screen printing, embroidery, laser engraving, any traditional decoration method\n**Why it's preferred**: EPS files are specifically designed for professional printing workflows.\n**The catch**: Like PDFs, an EPS file CAN contain a raster image. The file extension alone doesn't guarantee quality.",
+      "**AI (Adobe Illustrator)**\n**Type**: Vector (native)\n**When suppliers want it**: When they want the absolute source file with all editing capabilities\n**The challenge**: Requires Adobe Illustrator to open, and version compatibility can be an issue.",
+      "**SVG (Scalable Vector Graphics)**\n**Type**: Vector\n**When you'll see it**: Web graphics, modern design tools, some print-on-demand platforms\n**The advantage**: Text-based format, smaller file sizes, perfect for web\n**The limitation**: Not all print workflows accept SVG yet, though this is changing.",
+      "**JPG / JPEG (Joint Photographic Experts Group)**\n**Type**: Raster\n**When suppliers want it**: Almost never for logos (but fine for photos on products like mugs or photo blankets)\n**Why it's problematic**: JPG uses compression that creates artifacts, those fuzzy edges around text and shapes. Every time you save a JPG, quality degrades.\n**Distributor mistake**: Taking a screenshot of a logo and saving it as a JPG. This is a double-raster disaster.",
+      "### The Real-World Scenarios You Face",
+      "**Scenario 1: The Company Store Trap**\nYou're setting up a company store on MOQ1, ASI, or another print-on-demand platform. You need your client's logo. You visit their website, right-click their logo, and save it.\n\n**What you got**: A 72 DPI PNG or JPG optimized for web display.\n**What you need**: A 300+ DPI raster file, or better yet, a vector file.\n**The result**: The store launches, someone orders an embroidered polo, the decorator rejects the artwork. Now you're scrambling, the client thinks you're unprofessional, and you've lost time.\n**The fix**: Get vector files upfront, or have them professionally traced before you pitch the store.",
+      "**Scenario 2: The PDF Assumption**\nA client emails you their logo as a PDF. You forward it to your supplier. Two days later: \"We can't use this file, it's too low resolution.\"\n\n**What happened**: Someone created that PDF by inserting a low-res raster image into a Word document or PowerPoint and then \"saving as PDF.\" The file extension says PDF, but it's just a raster image in a PDF wrapper.\n**The fix**: Learn to check your PDFs before submitting them. Zoom in, if it's blurry, it's not vector.",
+      "**Scenario 3: The Transparent Background Request**\nYour DTF supplier says, \"We need a PNG with a transparent background.\" You use an online background remover tool on a low-resolution JPG, save it as PNG, and send it over.\n\n**What you did right**: Created transparency.\n**What you did wrong**: Started with a low-resolution source. Removing the background doesn't add resolution.\n**The result**: The transparency works, but the print quality is terrible pixelated edges and blurry details.\n**The fix**: Start with a high-resolution source, or convert to vector first, THEN export as high-resolution PNG.",
+      "### Why This Matters for Your Business\nUnderstanding graphic formats isn't just technical knowledge, it's customer service, it's professionalism, and it's money in your pocket.\n\n**When you understand formats, you can:**\n● Set up client company stores without artwork rejections\n● Quote jobs accurately (knowing when artwork prep is needed)\n● Avoid delays caused by file issues\n● Position yourself as an expert, not just an order-taker\n● Catch problems before they cost you time and money\n\n**When you don't understand formats:**\n● Suppliers reject your artwork (and you don't know why)\n● Projects get delayed\n● You waste hours going back and forth\n● Clients lose confidence in you\n● You leave money on the table because you avoid certain products",
+      "### The Simple Rule That Saves You Every Time\nWhen in doubt, ask yourself these two questions:\n\n**1. What decoration method will be used?**\n• Screen printing, embroidery, engraving = need vector (EPS, AI, or vector PDF)\n• Digital/DTF printing = can work with high-res raster (PNG), but vector is still better\n\n**2. Can I scale this file up 10x and still have it look sharp?**\n• If no = you need a better file\n• If yes = you're probably good to go",
+      "### What to Do When You Don't Have the Right File\nThis is where most distributors get stuck. Your client doesn't have a vector file. Their \"logo\" is a 200-pixel JPG from their ancient website. Now what? You have three options:\n\n**Option 1: Ask the client's original designer for the source file**\n(Good luck! They probably don't remember who designed it, or it was 2009).\n\n**Option 2: Use automated tracing software**\n(Adobe Illustrator's Image Trace, free online converters). The result? Usually mediocre. Automated tracing struggles with complex logos, creates messy paths, and often requires extensive cleanup.\n\n**Option 3: Have it professionally hand-traced by a specialist**\nThis is what Vector Lab does, we take that pixelated mess and redraw it as a clean, scalable vector file. For WEPROMO members, it's $15 flat rate, no matter how complex the logo.",
+      "### Your Action Plan\nStarting today, here's how to avoid artwork problems:\n\n**When onboarding a new client:**\n● Ask for their logo in vector format (AI, EPS, or vector PDF)\n● If they don't have it, explain why they need one\n● Get it traced once, use it forever across all their products\n\n**Before submitting artwork to a supplier:**\n● Zoom in to 400% and check for pixelation\n● If it's a PDF, verify it's vector by zooming in\n● Check file size as a clue (vector files are typically smaller than high-res rasters)\n\n**When setting up company stores:**\n● Don't grab logos from websites. They're 72 DPI\n● Start with vector files or have them traced first\n● Test the artwork in a proof before launching the store",
+      "### The Bottom Line\nGraphic file formats are not mysterious, they're just misunderstood. The difference between raster and vector, the quirks of PDF and EPS, the resolution requirements for print, once you understand these basics, you'll avoid 90% of the artwork problems that plague distributors.\n\nYou don't need to become a graphic designer. You just need to know enough to ask the right questions, check your files before submitting them, and recognize when you need professional help.\n\nYour clients are trusting you with their brand. Make sure what you send to the decorator represents them well—and makes you look like the professional you are.",
+      "### Need a logo converted to a print-ready vector file?\nVector Lab specializes in hand-tracing logos for promotional product distributors. WEPROMO members get flat-rate pricing at $15 per logo, regardless of complexity. Fast turnaround, unlimited revisions, and all the file formats your suppliers need.\n\nEmail us **info@vectortracelab.com** or visit **vectortracelab.com** to get started.",
+      "### Quick Reference Guide\n| Format | Type | Best For | Avoid For |\n|---|---|---|---|\n| PNG | Raster | Web graphics, DTF printing (if high-res) | Screen printing, embroidery, large-format |\n| JPG | Raster | Photos on products | Logos, text, anything that needs to scale |\n| PDF | Raster or Vector | Universal delivery (if vector) | Check before using (not all PDFs are equal) |\n| EPS | Usually Vector | Professional print workflows | Web use (not supported in browsers) |\n| AI | Vector | Editable source files | Sharing with clients who don't have Illustrator |\n| SVG | Vector | Web use, modern platforms | Older print workflows (compatibility issues) |\n\n*Save this chart—you'll refer to it constantly.*"
+    ]
+  },
   {
     id: "manual-vs-auto",
     title: "The Ultimate Guide to Manual Vector Tracing vs. Auto-Tracing",

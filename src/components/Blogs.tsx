@@ -21,12 +21,14 @@ import {
 import { motion, AnimatePresence } from "motion/react";
 import { useParams, useNavigate } from "react-router-dom";
 
-import { BlogPost, blogs } from "../data/blogsData";
+import { BlogPost } from "../types";
+import { getAllBlogs, getBlogById } from "../services/blogService";
 
 export default function Blogs() {
   const { id } = useParams<{ id?: string }>();
   const navigate = useNavigate();
 
+  const [allBlogs, setAllBlogs] = useState<BlogPost[]>(() => getAllBlogs(false));
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [emailInput, setEmailInput] = useState("");
@@ -34,14 +36,54 @@ export default function Blogs() {
   const [likedPosts, setLikedPosts] = useState<Record<string, boolean>>({});
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  // Active blog derived directly from URL route parameter
-  const activeBlog = id ? blogs.find((b) => b.id === id) : null;
+  // Sync with blog storage service
+  const refreshBlogsList = () => {
+    setAllBlogs(getAllBlogs(false));
+  };
+
+  useEffect(() => {
+    refreshBlogsList();
+    window.addEventListener("vector_lab_blogs_changed", refreshBlogsList);
+    return () => window.removeEventListener("vector_lab_blogs_changed", refreshBlogsList);
+  }, []);
+
+  // Active blog derived directly from URL route parameter or stored list
+  const activeBlog = id ? getBlogById(id, false) || allBlogs.find((b) => b.id === id) : null;
   const isInvalidId = Boolean(id && !activeBlog);
 
-  // Automatically update page title and scroll to top when changing active blog or route
+  // Automatically update page title and SEO meta tags when changing active blog or route
   useEffect(() => {
     if (activeBlog) {
-      document.title = `${activeBlog.title} | Vector Lab`;
+      const pageTitle = activeBlog.seo?.metaTitle || `${activeBlog.title} | Vector Lab`;
+      const metaDesc = activeBlog.seo?.metaDescription || activeBlog.summary;
+      document.title = pageTitle;
+
+      // Update or create meta description tag
+      let metaDescEl = document.querySelector('meta[name="description"]');
+      if (!metaDescEl) {
+        metaDescEl = document.createElement("meta");
+        metaDescEl.setAttribute("name", "description");
+        document.head.appendChild(metaDescEl);
+      }
+      metaDescEl.setAttribute("content", metaDesc);
+
+      // Open Graph Title
+      let ogTitle = document.querySelector('meta[property="og:title"]');
+      if (!ogTitle) {
+        ogTitle = document.createElement("meta");
+        ogTitle.setAttribute("property", "og:title");
+        document.head.appendChild(ogTitle);
+      }
+      ogTitle.setAttribute("content", pageTitle);
+
+      // Open Graph Image
+      let ogImg = document.querySelector('meta[property="og:image"]');
+      if (!ogImg) {
+        ogImg = document.createElement("meta");
+        ogImg.setAttribute("property", "og:image");
+        document.head.appendChild(ogImg);
+      }
+      ogImg.setAttribute("content", activeBlog.seo?.ogImage || activeBlog.heroImage);
     } else {
       document.title = "Vector Design Journal & Guides | Vector Lab";
     }
@@ -91,12 +133,12 @@ export default function Blogs() {
   };
 
   // Filtering & Search logic
-  const filteredBlogs = blogs.filter((blog) => {
+  const filteredBlogs = allBlogs.filter((blog) => {
     const matchesSearch =
       blog.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       blog.summary.toLowerCase().includes(searchQuery.toLowerCase()) ||
       blog.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      blog.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+      (blog.tags || []).some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
     
     const matchesCategory =
       selectedCategory === "All" || blog.category === selectedCategory;
@@ -104,11 +146,11 @@ export default function Blogs() {
     return matchesSearch && matchesCategory;
   });
 
-  const categories = ["All", "Branding", "Apparel", "Fabrication", "Vector Basics"];
+  const categories = ["All", ...Array.from(new Set(allBlogs.map(b => b.category || "Vector Basics")))];
   
-  // Featured Blog post is always the manual-vs-auto guide
-  const featuredBlog = blogs.find(b => b.id === "manual-vs-auto") || blogs[0];
-  const gridBlogs = filteredBlogs.filter(b => b.id !== (activeBlog ? "" : featuredBlog.id));
+  // Featured Blog post - highlights the latest publication
+  const featuredBlog = allBlogs[0] || null;
+  const gridBlogs = filteredBlogs.filter(b => b.id !== (activeBlog ? "" : (featuredBlog?.id || "")));
 
   // Render Category-Specific SVG Decorative Illustration to feel like an actual high-end trace lab
   const renderCardIllustration = (category: string) => {
@@ -607,30 +649,171 @@ export default function Blogs() {
                     </p>
 
                     {activeBlog.content.map((para, i) => {
-                      // Check if paragraph contains bold bullet points inside double stars
-                      if (para.includes("**")) {
-                        const parts = para.split("\n");
+                      // 1. Table Detection & Rendering
+                      if (para.includes("|") && para.includes("\n|")) {
+                        const lines = para.split("\n").filter(l => l.trim().startsWith("|"));
+                        if (lines.length >= 2) {
+                          const headers = lines[0].split("|").map(s => s.trim()).filter(Boolean);
+                          // Exclude separator line like |---|---|
+                          const dataRows = lines.slice(1).filter(l => !l.includes("---")).map(l => 
+                            l.split("|").map(s => s.trim()).filter(Boolean)
+                          );
+
+                          return (
+                            <div key={i} className="my-6 overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-xs font-sans">
+                              <table className="w-full text-left text-xs sm:text-sm border-collapse">
+                                <thead>
+                                  <tr className="bg-slate-900 text-white font-bold border-b border-slate-800">
+                                    {headers.map((h, hIdx) => (
+                                      <th key={hIdx} className="px-4 py-3 text-xs uppercase tracking-wider">{h}</th>
+                                    ))}
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-100">
+                                  {dataRows.map((row, rIdx) => (
+                                    <tr key={rIdx} className={rIdx % 2 === 0 ? "bg-white" : "bg-gray-50/70"}>
+                                      {row.map((cell, cIdx) => (
+                                        <td key={cIdx} className={`px-4 py-3 ${cIdx === 0 ? "font-bold text-brand-text-dark" : "text-gray-600"}`}>
+                                          {cell}
+                                        </td>
+                                      ))}
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          );
+                        }
+                      }
+
+                      // 2. Promotional CTA / Callout Block
+                      if (para.includes("Need a logo converted to a print-ready vector file?") || para.includes("WEPROMO members")) {
+                        const lines = para.split("\n").filter(Boolean);
                         return (
-                          <div key={i} className="space-y-4 font-sans pt-2">
-                            {parts.map((p, idx) => {
-                              if (p.startsWith("**")) {
-                                const cleanKey = p.substring(2, p.indexOf("**:"));
-                                const cleanText = p.substring(p.indexOf("**:") + 3);
+                          <div key={i} className="my-8 p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-blue-50 via-indigo-50/50 to-white border-2 border-primary-blue/30 shadow-sm font-sans space-y-4">
+                            <div className="flex items-center gap-2 text-primary-blue font-black text-sm uppercase tracking-wider">
+                              <Sparkles className="w-4 h-4" />
+                              <span>Vector Lab Exclusive Service</span>
+                            </div>
+                            <h3 className="text-xl sm:text-2xl font-black text-brand-text-dark tracking-tight">
+                              Need a logo converted to a print-ready vector file?
+                            </h3>
+                            <p className="text-gray-700 text-sm sm:text-base leading-relaxed">
+                              Vector Lab specializes in hand-tracing logos for promotional product distributors. <strong className="text-primary-blue font-black">WEPROMO members get flat-rate pricing at $15 per logo</strong>, regardless of complexity. Fast turnaround, unlimited revisions, and all the file formats your suppliers need.
+                            </p>
+                            <div className="pt-2 flex flex-wrap items-center gap-3">
+                              <a
+                                href="mailto:info@vectortracelab.com"
+                                className="inline-flex items-center gap-2 bg-primary-blue text-white text-xs sm:text-sm font-bold px-5 py-3 rounded-xl hover:bg-blue-600 shadow-sm transition-all"
+                              >
+                                <Mail className="w-4 h-4" />
+                                Email info@vectortracelab.com
+                              </a>
+                              <a
+                                href="https://vectortracelab.com"
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-2 bg-white text-brand-text-dark text-xs sm:text-sm font-bold px-5 py-3 rounded-xl border border-gray-200 hover:border-primary-blue transition-all"
+                              >
+                                Visit vectortracelab.com
+                              </a>
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      // 3. Section Heading (### Heading)
+                      if (para.startsWith("### ")) {
+                        const headingText = para.replace("### ", "").trim();
+                        return (
+                          <h3 key={i} className="text-xl sm:text-2xl font-black text-brand-text-dark pt-6 pb-1 tracking-tight font-sans border-b border-gray-100">
+                            {headingText}
+                          </h3>
+                        );
+                      }
+
+                      // 4. Section Heading (## Heading)
+                      if (para.startsWith("## ")) {
+                        const headingText = para.replace("## ", "").trim();
+                        return (
+                          <h2 key={i} className="text-2xl sm:text-3xl font-black text-brand-text-dark pt-8 pb-2 tracking-tight font-sans">
+                            {headingText}
+                          </h2>
+                        );
+                      }
+
+                      // 5. Multi-line paragraph with bold labels or bullets
+                      if (para.includes("\n") || para.includes("**") || para.includes("●") || para.includes("•")) {
+                        const lines = para.split("\n");
+                        return (
+                          <div key={i} className="space-y-3 font-sans pt-1">
+                            {lines.map((line, idx) => {
+                              const trimmed = line.trim();
+                              if (!trimmed) return null;
+
+                              // Subheading inside line
+                              if (trimmed.startsWith("### ")) {
                                 return (
-                                  <p key={idx} className="text-gray-700">
+                                  <h3 key={idx} className="text-lg sm:text-xl font-black text-brand-text-dark pt-4 pb-1">
+                                    {trimmed.replace("### ", "")}
+                                  </h3>
+                                );
+                              }
+
+                              // Bullet items (● or • or -)
+                              if (trimmed.startsWith("●") || trimmed.startsWith("•") || trimmed.startsWith("- ")) {
+                                const cleanBullet = trimmed.replace(/^[●•\-]\s*/, "");
+                                return (
+                                  <div key={idx} className="flex items-start gap-2.5 pl-2 text-gray-700 text-sm sm:text-base leading-relaxed">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-primary-blue mt-2 shrink-0" />
+                                    <span>{cleanBullet}</span>
+                                  </div>
+                                );
+                              }
+
+                              // Bold key-value label: **Key**: Value
+                              if (trimmed.startsWith("**") && trimmed.includes("**:")) {
+                                const cleanKey = trimmed.substring(2, trimmed.indexOf("**:"));
+                                const cleanText = trimmed.substring(trimmed.indexOf("**:") + 3);
+                                return (
+                                  <p key={idx} className="text-gray-700 text-sm sm:text-base leading-relaxed">
                                     <strong className="text-brand-text-dark font-extrabold">{cleanKey}:</strong>{cleanText}
                                   </p>
                                 );
                               }
-                              return <p key={idx}>{p}</p>;
+
+                              // Bold standalone header: **Header**
+                              if (trimmed.startsWith("**") && trimmed.endsWith("**")) {
+                                const cleanHeading = trimmed.slice(2, -2);
+                                return (
+                                  <h4 key={idx} className="text-base sm:text-lg font-black text-brand-text-dark pt-2">
+                                    {cleanHeading}
+                                  </h4>
+                                );
+                              }
+
+                              // Italic note: *Note*
+                              if (trimmed.startsWith("*") && trimmed.endsWith("*")) {
+                                return (
+                                  <p key={idx} className="text-xs sm:text-sm text-gray-500 italic">
+                                    {trimmed.slice(1, -1)}
+                                  </p>
+                                );
+                              }
+
+                              return (
+                                <p key={idx} className="text-gray-700 text-sm sm:text-base leading-relaxed">
+                                  {trimmed}
+                                </p>
+                              );
                             })}
                           </div>
                         );
                       }
                       
-                      // Render standard paragraphs with elegant, natural font styling
+                      // 6. Standard prose paragraph
                       return (
-                        <p key={i} className="text-gray-700 leading-relaxed">
+                        <p key={i} className="text-gray-700 leading-relaxed font-sans text-sm sm:text-base">
                           {para}
                         </p>
                       );
@@ -677,7 +860,7 @@ export default function Blogs() {
                       Related Blueprints
                     </h3>
                     <div className="space-y-4">
-                      {blogs
+                      {allBlogs
                         .filter(b => b.id !== activeBlog.id)
                         .slice(0, 3)
                         .map(rel => (

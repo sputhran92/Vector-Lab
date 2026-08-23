@@ -17,6 +17,7 @@ import PreferredSupplier from "./components/PreferredSupplier";
 import Contact from "./components/Contact";
 import Blogs from "./components/Blogs";
 import Footer from "./components/Footer";
+import AdminPortal from "./components/admin/AdminPortal";
 
 function AppContent() {
   const [currentPage, setCurrentPage] = useState("home");
@@ -28,6 +29,12 @@ function AppContent() {
   }, []);
   
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // If inside private Admin Studio, render dedicated layout
+  if (location.pathname.startsWith("/admin")) {
+    return <AdminPortal />;
+  }
 
   const scrollToSection = (id: string) => {
     const el = document.querySelector(id);
@@ -153,6 +160,10 @@ function AppContent() {
         <Route path="/blogs" element={<div className="pt-20 min-h-screen bg-gray-50"><Blogs /></div>} />
         <Route path="/blogs/:id" element={<div className="pt-20 min-h-screen bg-gray-50"><Blogs /></div>} />
         <Route path="/blog/:id" element={<div className="pt-20 min-h-screen bg-gray-50"><Blogs /></div>} />
+
+        {/* Admin Portal Routes */}
+        <Route path="/admin" element={<AdminPortal />} />
+        <Route path="/admin/*" element={<AdminPortal />} />
 
         {/* New Separate Page called "Portfolio" */}
         <Route path="/portfolio" element={<Portfolio />} />
