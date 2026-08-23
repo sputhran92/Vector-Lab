@@ -2,8 +2,12 @@ import { BlogPost } from "../types";
 import { blogs as defaultBlogs } from "../data/blogsData";
 import mammoth from "mammoth";
 
-const STORAGE_KEY = "vector_lab_custom_blogs_v2";
-const LEGACY_STORAGE_KEY = "vector_lab_custom_blogs_v1";
+const STORAGE_KEY = "vector_lab_custom_blogs_v3";
+const OLD_STORAGE_KEYS = [
+  "vector_lab_custom_blogs_v2",
+  "vector_lab_custom_blogs_v1",
+  "vector_lab_custom_blogs",
+];
 const EVENT_NAME = "vector_lab_blogs_changed";
 
 let cachedBlogs: BlogPost[] = [];
@@ -15,6 +19,13 @@ function initCachedBlogs(): BlogPost[] {
   if (cachedBlogs.length > 0) return cachedBlogs;
 
   try {
+    // Purge old keys
+    for (const key of OLD_STORAGE_KEYS) {
+      try {
+        localStorage.removeItem(key);
+      } catch {}
+    }
+
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed: BlogPost[] = JSON.parse(raw);
@@ -46,7 +57,7 @@ export async function syncBlogsFromServer(): Promise<BlogPost[]> {
         cachedBlogs = serverBlogs;
         try {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(serverBlogs));
-          localStorage.removeItem(LEGACY_STORAGE_KEY);
+          for (const k of OLD_STORAGE_KEYS) localStorage.removeItem(k);
         } catch {}
         if (typeof window !== "undefined") {
           window.dispatchEvent(new CustomEvent(EVENT_NAME, { detail: serverBlogs }));
@@ -192,7 +203,7 @@ export async function resetBlogsToDefault(): Promise<void> {
   cachedBlogs = [...defaultBlogs];
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultBlogs));
-    localStorage.removeItem(LEGACY_STORAGE_KEY);
+    for (const k of OLD_STORAGE_KEYS) localStorage.removeItem(k);
   } catch {}
 
   if (typeof window !== "undefined") {
