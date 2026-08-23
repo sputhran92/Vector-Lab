@@ -15,7 +15,6 @@ function initCachedBlogs(): BlogPost[] {
   if (cachedBlogs.length > 0) return cachedBlogs;
 
   try {
-    // Check current versioned storage
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed: BlogPost[] = JSON.parse(raw);
@@ -24,53 +23,30 @@ function initCachedBlogs(): BlogPost[] {
         return parsed;
       }
     }
+  } catch {}
 
-    // Check legacy storage and migrate if valid
-    const legacyRaw = localStorage.getItem(LEGACY_STORAGE_KEY);
-    if (legacyRaw) {
-      try {
-        const legacyParsed: BlogPost[] = JSON.parse(legacyRaw);
-        if (Array.isArray(legacyParsed) && legacyParsed.length > 0) {
-          // If defaultBlogs had edits, prefer defaultBlogs for seeded posts and keep custom ones
-          const customPosts = legacyParsed.filter(
-            lp => !defaultBlogs.some(db => db.id.toLowerCase() === lp.id.toLowerCase())
-          );
-          const merged = [...defaultBlogs, ...customPosts];
-          cachedBlogs = merged;
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
-          localStorage.removeItem(LEGACY_STORAGE_KEY);
-          return merged;
-        }
-      } catch {}
-    }
-
-    // Default to seeded dataset
-    cachedBlogs = [...defaultBlogs];
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultBlogs));
-    return defaultBlogs;
-  } catch {
-    cachedBlogs = [...defaultBlogs];
-    return defaultBlogs;
-  }
+  cachedBlogs = [...defaultBlogs];
+  return defaultBlogs;
 }
 
 /**
- * Synchronize blogs from server API and update local cache
+ * Synchronize blogs from server API and overwrite local cache with live database state
  */
 export async function syncBlogsFromServer(): Promise<BlogPost[]> {
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3000);
+    const timeoutId = setTimeout(() => controller.abort(), 2500);
 
     const res = await fetch("/api/blogs?all=true", { signal: controller.signal });
     clearTimeout(timeoutId);
 
     if (res.ok) {
       const serverBlogs: BlogPost[] = await res.json();
-      if (Array.isArray(serverBlogs) && serverBlogs.length > 0) {
+      if (Array.isArray(serverBlogs)) {
         cachedBlogs = serverBlogs;
         try {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(serverBlogs));
+          localStorage.removeItem(LEGACY_STORAGE_KEY);
         } catch {}
         if (typeof window !== "undefined") {
           window.dispatchEvent(new CustomEvent(EVENT_NAME, { detail: serverBlogs }));
@@ -79,7 +55,7 @@ export async function syncBlogsFromServer(): Promise<BlogPost[]> {
       }
     }
   } catch (err) {
-    // Fallback to local
+    // Fallback to memory/local
   }
   return getAllBlogs(true);
 }

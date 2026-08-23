@@ -44,7 +44,7 @@ export default function Blogs() {
   useEffect(() => {
     refreshBlogsList();
     syncBlogsFromServer().then((latest) => {
-      if (latest && latest.length > 0) {
+      if (Array.isArray(latest)) {
         setAllBlogs(latest.filter(b => b.status !== "draft"));
       }
     });
@@ -52,8 +52,8 @@ export default function Blogs() {
     return () => window.removeEventListener("vector_lab_blogs_changed", refreshBlogsList);
   }, []);
 
-  // Active blog derived directly from URL route parameter or stored list
-  const activeBlog = id ? getBlogById(id, false) || allBlogs.find((b) => b.id === id) : null;
+  // Active blog derived directly from synchronized state
+  const activeBlog = id ? allBlogs.find((b) => b.id.toLowerCase() === id.toLowerCase()) || null : null;
   const isInvalidId = Boolean(id && !activeBlog);
 
   // Automatically update page title and SEO meta tags when changing active blog or route
