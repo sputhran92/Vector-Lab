@@ -323,18 +323,26 @@ async function startServer() {
     }
   });
 
-  // Vite middleware for development (fallback to serving dist if it exists)
-  const distPath = path.join(process.cwd(), 'dist');
-  const hasDist = fs.existsSync(distPath);
-  const isProduction = process.env.NODE_ENV === "production" || hasDist;
+  // Enable CORS & preflight
+  app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    if (req.method === "OPTIONS") {
+      return res.sendStatus(200);
+    }
+    next();
+  });
 
-  if (!isProduction) {
+  // Vite middleware for development vs static build for production
+  if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
     });
     app.use(vite.middlewares);
   } else {
+    const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
     app.get('*', (req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
