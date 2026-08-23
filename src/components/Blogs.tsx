@@ -19,22 +19,52 @@ import {
   FileText
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { useParams, useNavigate } from "react-router-dom";
 
 import { BlogPost, blogs } from "../data/blogsData";
 
 export default function Blogs() {
+  const { id } = useParams<{ id?: string }>();
+  const navigate = useNavigate();
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
-  const [activeBlog, setActiveBlog] = useState<BlogPost | null>(null);
   const [emailInput, setEmailInput] = useState("");
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [likedPosts, setLikedPosts] = useState<Record<string, boolean>>({});
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  // Automatically scroll to top when changing active blog
+  // Active blog derived directly from URL route parameter
+  const activeBlog = id ? blogs.find((b) => b.id === id) : null;
+  const isInvalidId = Boolean(id && !activeBlog);
+
+  // Automatically update page title and scroll to top when changing active blog or route
   useEffect(() => {
+    if (activeBlog) {
+      document.title = `${activeBlog.title} | Vector Lab`;
+    } else {
+      document.title = "Vector Design Journal & Guides | Vector Lab";
+    }
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [activeBlog]);
+  }, [activeBlog, id]);
+
+  const handleOpenBlog = (blogId: string) => {
+    navigate(`/blogs/${blogId}`);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleBackToBlogs = () => {
+    navigate("/blogs");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleQuoteRequest = () => {
+    navigate("/");
+    setTimeout(() => {
+      const el = document.getElementById("contact");
+      if (el) el.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  };
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,16 +76,16 @@ export default function Blogs() {
     }
   };
 
-  const handleLike = (id: string, e: React.MouseEvent) => {
+  const handleLike = (postId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    setLikedPosts(prev => ({ ...prev, [id]: !prev[id] }));
+    setLikedPosts(prev => ({ ...prev, [postId]: !prev[postId] }));
   };
 
-  const copyToClipboard = (id: string, e: React.MouseEvent) => {
+  const copyToClipboard = (postId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    const url = `${window.location.origin}/blogs/${id}`;
+    const url = `${window.location.origin}/blogs/${postId}`;
     navigator.clipboard.writeText(url).then(() => {
-      setCopiedId(id);
+      setCopiedId(postId);
       setTimeout(() => setCopiedId(null), 2000);
     });
   };
@@ -136,7 +166,34 @@ export default function Blogs() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <AnimatePresence mode="wait">
-          {!activeBlog ? (
+          {isInvalidId ? (
+            /* Invalid / Not Found Blog ID state */
+            <motion.div
+              key="blog-not-found"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              className="text-center py-20 bg-white rounded-3xl border border-gray-100 shadow-sm max-w-2xl mx-auto p-8 space-y-6"
+              id="blog-not-found-view"
+            >
+              <div className="w-16 h-16 rounded-2xl bg-primary-blue/10 text-primary-blue mx-auto flex items-center justify-center">
+                <FileText className="w-8 h-8" />
+              </div>
+              <div className="space-y-2">
+                <h2 className="text-2xl md:text-3xl font-extrabold text-brand-text-dark">Article Not Found</h2>
+                <p className="text-gray-500 text-sm max-w-md mx-auto leading-relaxed">
+                  The vector blueprint or guide you requested doesn't exist or may have been moved.
+                </p>
+              </div>
+              <button
+                onClick={handleBackToBlogs}
+                className="bg-primary-blue hover:bg-primary-blue/90 text-white px-6 py-3 rounded-xl font-bold text-xs inline-flex items-center gap-2 cursor-pointer shadow-md shadow-primary-blue/10 transition-all"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to All Guides
+              </button>
+            </motion.div>
+          ) : !activeBlog ? (
             /* ========================================================================= */
             /* 1. MAIN BLOG INDEX VIEW                                                   */
             /* ========================================================================= */
@@ -218,7 +275,7 @@ export default function Blogs() {
                         </div>
 
                         <button
-                          onClick={() => setActiveBlog(featuredBlog)}
+                          onClick={() => handleOpenBlog(featuredBlog.id)}
                           className="bg-brand-text-dark hover:bg-primary-blue text-white hover:shadow-lg hover:shadow-primary-blue/20 transition-all duration-300 px-6 py-3 rounded-xl text-xs font-bold inline-flex items-center gap-2 self-start sm:self-auto cursor-pointer"
                         >
                           Read Featured Article
@@ -282,7 +339,7 @@ export default function Blogs() {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.4, delay: idx * 0.05 }}
-                      onClick={() => setActiveBlog(blog)}
+                      onClick={() => handleOpenBlog(blog.id)}
                       className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between h-full cursor-pointer group"
                       id={`blog-card-${blog.id}`}
                     >
@@ -470,7 +527,7 @@ export default function Blogs() {
               {/* Floating Action Header Bar */}
               <div className="flex items-center justify-between pb-4 border-b border-gray-200">
                 <button
-                  onClick={() => setActiveBlog(null)}
+                  onClick={handleBackToBlogs}
                   className="flex items-center gap-2 text-xs font-bold text-gray-600 hover:text-primary-blue bg-white px-4 py-2.5 rounded-xl border border-gray-100 hover:border-primary-blue/30 shadow-xs hover:shadow-sm transition-all cursor-pointer"
                 >
                   <ArrowLeft className="w-4 h-4" />
@@ -626,7 +683,7 @@ export default function Blogs() {
                         .map(rel => (
                           <div 
                             key={rel.id}
-                            onClick={() => setActiveBlog(rel)}
+                            onClick={() => handleOpenBlog(rel.id)}
                             className="group flex gap-3 cursor-pointer items-start hover:bg-gray-50 p-2 rounded-xl transition-all duration-300"
                           >
                             <div className={`w-14 h-14 bg-gradient-to-br ${rel.imageGradient} rounded-lg shrink-0 relative overflow-hidden flex items-center justify-center text-white`}>
@@ -702,11 +759,7 @@ export default function Blogs() {
                       Have a fuzzy image, low-res artwork, or blueprint sketches? Get manual clean-ups from our experts with 100% precision.
                     </p>
                     <button
-                      onClick={() => {
-                        setActiveBlog(null);
-                        const el = document.getElementById("contact");
-                        if (el) el.scrollIntoView({ behavior: "smooth" });
-                      }}
+                      onClick={handleQuoteRequest}
                       className="text-xs font-extrabold text-primary-blue hover:text-accent-blue transition-colors flex items-center justify-center gap-1 mx-auto cursor-pointer"
                     >
                       Request Free Quote

@@ -1,6 +1,6 @@
 import React from "react";
 import { Mail, ArrowUp, Phone } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 const logoImg = "https://lh3.googleusercontent.com/d/1skSSg47Q4aQ1Dhvsm0TfyXJgOGIRxheJ";
 
 interface FooterProps {
@@ -9,6 +9,7 @@ interface FooterProps {
 }
 
 export default function Footer({ onPageChange, onServiceSelect }: FooterProps) {
+  const navigate = useNavigate();
   
   const quickLinks = [
     { name: "Home", id: "home" },
@@ -33,7 +34,14 @@ export default function Footer({ onPageChange, onServiceSelect }: FooterProps) {
 
   const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
     e.preventDefault();
-    onPageChange(id);
+    if (id === "blogs") {
+      navigate("/blogs");
+    } else if (id === "portfolio") {
+      navigate("/portfolio");
+    } else {
+      navigate("/");
+      onPageChange(id);
+    }
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 

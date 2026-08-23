@@ -149,6 +149,11 @@ function AppContent() {
           }
         />
 
+        {/* Blogs & Individual Blog Article Routes */}
+        <Route path="/blogs" element={<div className="pt-20 min-h-screen bg-gray-50"><Blogs /></div>} />
+        <Route path="/blogs/:id" element={<div className="pt-20 min-h-screen bg-gray-50"><Blogs /></div>} />
+        <Route path="/blog/:id" element={<div className="pt-20 min-h-screen bg-gray-50"><Blogs /></div>} />
+
         {/* New Separate Page called "Portfolio" */}
         <Route path="/portfolio" element={<Portfolio />} />
         {/* New Separate Page called "Terms" */}
