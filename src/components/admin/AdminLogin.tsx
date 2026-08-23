@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Lock, Eye, EyeOff, ShieldCheck, ArrowRight, Sparkles } from "lucide-react";
-import { loginAdmin } from "../../services/authService";
+import { Lock, Eye, EyeOff, ShieldCheck, ArrowRight } from "lucide-react";
+import { loginAdminAsync } from "../../services/authService";
 
 interface AdminLoginProps {
   onLoginSuccess: () => void;
@@ -13,20 +13,23 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
-    setTimeout(() => {
-      const res = loginAdmin(password, rememberMe);
+    try {
+      const res = await loginAdminAsync(password, rememberMe);
       if (res.success) {
         onLoginSuccess();
       } else {
         setError(res.error || "Authentication failed.");
       }
+    } catch {
+      setError("An unexpected error occurred. Please try again.");
+    } finally {
       setLoading(false);
-    }, 300);
+    }
   };
 
   return (
@@ -112,21 +115,6 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
               )}
             </button>
           </form>
-
-          {/* Quick Default Passcode hint */}
-          <div className="mt-6 pt-6 border-t border-slate-800/80 text-center">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 text-slate-400 text-xs">
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span>Default Passcode:</span>
-              <button
-                type="button"
-                onClick={() => setPassword("vectorlab2026")}
-                className="text-primary-blue hover:underline font-mono font-bold ml-1 cursor-pointer"
-              >
-                vectorlab2026
-              </button>
-            </div>
-          </div>
         </div>
 
         <div className="text-center mt-6">

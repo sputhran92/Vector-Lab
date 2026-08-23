@@ -5,8 +5,57 @@ import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 import multer from "multer";
 import fs from "fs";
+import { blogs as initialBlogs } from "./src/data/blogsData";
 
 dotenv.config();
+
+interface StoreData {
+  adminPassword: string;
+  blogs: any[];
+}
+
+const DATA_DIR = path.join(process.cwd(), "data");
+const STORE_PATH = path.join(DATA_DIR, "store.json");
+const DEFAULT_PASSWORD = "vectorlab2026";
+
+// Ensure data directory and store file exist
+function initStore(): StoreData {
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  }
+
+  if (!fs.existsSync(STORE_PATH)) {
+    const initialData: StoreData = {
+      adminPassword: DEFAULT_PASSWORD,
+      blogs: initialBlogs,
+    };
+    fs.writeFileSync(STORE_PATH, JSON.stringify(initialData, null, 2), "utf-8");
+    return initialData;
+  }
+
+  try {
+    const raw = fs.readFileSync(STORE_PATH, "utf-8");
+    const parsed = JSON.parse(raw);
+    if (!parsed.adminPassword) parsed.adminPassword = DEFAULT_PASSWORD;
+    if (!Array.isArray(parsed.blogs)) parsed.blogs = initialBlogs;
+    return parsed;
+  } catch (err) {
+    console.error("Error reading store.json, re-initializing with defaults", err);
+    const initialData: StoreData = {
+      adminPassword: DEFAULT_PASSWORD,
+      blogs: initialBlogs,
+    };
+    fs.writeFileSync(STORE_PATH, JSON.stringify(initialData, null, 2), "utf-8");
+    return initialData;
+  }
+}
+
+function saveStore(data: StoreData) {
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  }
+  fs.writeFileSync(STORE_PATH, JSON.stringify(data, null, 2), "utf-8");
+}
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -14,7 +63,140 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  app.use(express.json());
+  app.use(express.json({ limit: "50mb" }));
+
+  // ==========================================
+  // AUTH & BLOG API ROUTES (GLOBAL SYNC)
+  // ==========================================
+
+  // Admin Auth: Login
+  app.post("/api/auth/login", (req, res) => {
+    const { password } = req.body;
+    const store = initStore();
+
+    if (!password) {
+      return res.status(400).json({ success: false, error: "Password is required" });
+    }
+
+    if (password === store.adminPassword) {
+      const sessionToken = Buffer.from(`admin_${Date.now()}_${store.adminPassword}`).toString("base64");
+      return res.json({
+        success: true,
+        token: sessionToken,
+        user: { name: "Vector Lab Administrator", role: "admin" }
+      });
+    }
+
+    return res.status(401).json({ success: false, error: "Invalid admin passcode." });
+  });
+
+  // Admin Auth: Change Master Passcode
+  app.post("/api/auth/change-password", (req, res) => {
+    const { oldPassword, newPassword } = req.body;
+    const store = initStore();
+
+    if (oldPassword !== store.adminPassword) {
+      return res.status(400).json({ success: false, error: "Current passcode is incorrect." });
+    }
+
+    if (!newPassword || newPassword.trim().length < 6) {
+      return res.status(400).json({ success: false, error: "New passcode must be at least 6 characters." });
+    }
+
+    store.adminPassword = newPassword.trim();
+    saveStore(store);
+
+    const newSessionToken = Buffer.from(`admin_${Date.now()}_${store.adminPassword}`).toString("base64");
+
+    return res.json({
+      success: true,
+      message: "Passcode updated successfully across all browsers and devices!",
+      token: newSessionToken
+    });
+  });
+
+  // Blog Posts: Get All
+  app.get("/api/blogs", (req, res) => {
+    const includeDrafts = req.query.all === "true";
+    const store = initStore();
+    const result = includeDrafts
+      ? store.blogs
+      : store.blogs.filter((b: any) => b.status !== "draft");
+    res.json(result);
+  });
+
+  // Blog Posts: Get Single
+  app.get("/api/blogs/:id", (req, res) => {
+    const { id } = req.params;
+    const store = initStore();
+    const blog = store.blogs.find((b: any) => b.id.toLowerCase() === id.toLowerCase());
+    if (!blog) {
+      return res.status(404).json({ error: "Blog post not found" });
+    }
+    res.json(blog);
+  });
+
+  // Blog Posts: Create / Save / Update
+  app.post("/api/blogs", (req, res) => {
+    const blog = req.body;
+    if (!blog || !blog.id || !blog.title) {
+      return res.status(400).json({ success: false, error: "Blog ID and Title are required" });
+    }
+
+    const store = initStore();
+    const existingIndex = store.blogs.findIndex(
+      (b: any) => b.id.toLowerCase() === blog.id.toLowerCase()
+    );
+
+    const enrichedBlog = {
+      ...blog,
+      updatedAt: new Date().toISOString(),
+      createdAt: blog.createdAt || new Date().toISOString(),
+      status: blog.status || "published",
+    };
+
+    if (existingIndex >= 0) {
+      store.blogs[existingIndex] = enrichedBlog;
+    } else {
+      store.blogs.unshift(enrichedBlog);
+    }
+
+    saveStore(store);
+    res.json({ success: true, blog: enrichedBlog });
+  });
+
+  // Blog Posts: Delete
+  app.delete("/api/blogs/:id", (req, res) => {
+    const { id } = req.params;
+    const store = initStore();
+    store.blogs = store.blogs.filter((b: any) => b.id.toLowerCase() !== id.toLowerCase());
+    saveStore(store);
+    res.json({ success: true });
+  });
+
+  // Blog Posts: Reset to seed defaults
+  app.post("/api/blogs/reset", (req, res) => {
+    const store = initStore();
+    store.blogs = initialBlogs;
+    saveStore(store);
+    res.json({ success: true, count: initialBlogs.length });
+  });
+
+  // Blog Posts: Bulk Import
+  app.post("/api/blogs/import", (req, res) => {
+    const { blogs: importedBlogs } = req.body;
+    if (!Array.isArray(importedBlogs)) {
+      return res.status(400).json({ success: false, error: "Import data must be an array of blogs" });
+    }
+    const store = initStore();
+    store.blogs = importedBlogs;
+    saveStore(store);
+    res.json({ success: true, count: importedBlogs.length });
+  });
+
+  // ==========================================
+  // CONTACT & DIAGNOSTICS ROUTES
+  // ==========================================
 
   // Diagnostic API route for verifying SMTP setup
   app.get("/api/debug-smtp", async (req, res) => {
@@ -72,7 +254,7 @@ async function startServer() {
     }
   });
 
-  // API routes
+  // Contact quote API
   app.post("/api/contact", upload.array("files"), async (req, res) => {
     const { name, email, message, projectType } = req.body;
     const files = req.files as Express.Multer.File[] || [];
@@ -106,7 +288,7 @@ async function startServer() {
         pass: process.env.SMTP_PASS,
       },
       tls: {
-        rejectUnauthorized: false // bypass SSL verification issues common with custom SMTP servers
+        rejectUnauthorized: false
       }
     });
 
@@ -120,7 +302,7 @@ async function startServer() {
       await transporter.sendMail({
         from: process.env.SMTP_FROM || process.env.SMTP_USER,
         to: receiverEmail,
-        replyTo: email, // ensures clicking "Reply" in the client goes to the submitter
+        replyTo: email,
         subject: `[VTL Quote Request] ${projectType} - from ${name}`,
         text: `You have received a new vector trace quote request.\n\n` +
               `--- Contact Details ---\n` +
