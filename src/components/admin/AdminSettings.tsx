@@ -6,12 +6,9 @@ import {
   RefreshCcw,
   Check,
   AlertTriangle,
-  Sparkles,
-  Shield,
-  Save,
   FileJson
 } from "lucide-react";
-import { changeAdminPassword } from "../../services/authService";
+import { changeAdminPasswordAsync } from "../../services/authService";
 import {
   exportBlogsJSON,
   importBlogsJSON,
@@ -25,13 +22,14 @@ export default function AdminSettings() {
   const [confirmPass, setConfirmPass] = useState("");
   const [passError, setPassError] = useState("");
   const [passSuccess, setPassSuccess] = useState(false);
+  const [passLoading, setPassLoading] = useState(false);
 
   // Backup & Restore state
   const [importStatus, setImportStatus] = useState<string | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
-  const handlePasswordSubmit = (e: React.FormEvent) => {
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setPassError("");
     setPassSuccess(false);
@@ -41,15 +39,22 @@ export default function AdminSettings() {
       return;
     }
 
-    const res = changeAdminPassword(oldPass, newPass);
-    if (res.success) {
-      setPassSuccess(true);
-      setOldPass("");
-      setNewPass("");
-      setConfirmPass("");
-      setTimeout(() => setPassSuccess(false), 4000);
-    } else {
-      setPassError(res.error || "Failed to update passcode.");
+    setPassLoading(true);
+    try {
+      const res = await changeAdminPasswordAsync(oldPass, newPass);
+      if (res.success) {
+        setPassSuccess(true);
+        setOldPass("");
+        setNewPass("");
+        setConfirmPass("");
+        setTimeout(() => setPassSuccess(false), 4000);
+      } else {
+        setPassError(res.error || "Failed to update passcode.");
+      }
+    } catch {
+      setPassError("Failed to update passcode. Please try again.");
+    } finally {
+      setPassLoading(false);
     }
   };
 
@@ -162,9 +167,10 @@ export default function AdminSettings() {
 
           <button
             type="submit"
-            className="px-5 py-2.5 rounded-xl bg-primary-blue hover:bg-blue-600 text-white text-xs font-bold transition-all shadow-lg shadow-primary-blue/20 cursor-pointer"
+            disabled={passLoading}
+            className="px-5 py-2.5 rounded-xl bg-primary-blue hover:bg-blue-600 disabled:opacity-50 text-white text-xs font-bold transition-all shadow-lg shadow-primary-blue/20 cursor-pointer disabled:cursor-not-allowed"
           >
-            Update Passcode
+            {passLoading ? "Updating..." : "Update Passcode"}
           </button>
         </form>
       </div>

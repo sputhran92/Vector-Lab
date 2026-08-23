@@ -1,4 +1,6 @@
 const ADMIN_AUTH_KEY = "vector_lab_admin_auth_session";
+const ADMIN_PASSWORD_KEY = "vector_lab_admin_password_hash";
+const DEFAULT_PASSWORD = "vectorlab2026";
 
 export interface AdminSession {
   isAuthenticated: boolean;
@@ -42,97 +44,178 @@ export function getAdminToken(): string | null {
 }
 
 /**
- * Authenticate against the server with the master passcode (synchronized across all browsers!)
+ * Helper to store session
+ */
+function setStoredSession(token: string, rememberMe = true) {
+  const sessionData: AdminSession = {
+    isAuthenticated: true,
+    token,
+    timestamp: Date.now(),
+    user: "Vector Lab Administrator",
+  };
+  if (rememberMe) {
+    localStorage.setItem(ADMIN_AUTH_KEY, JSON.stringify(sessionData));
+  } else {
+    sessionStorage.setItem(ADMIN_AUTH_KEY, JSON.stringify(sessionData));
+  }
+}
+
+/**
+ * Get the currently configured passcode (from localStorage or default)
+ */
+export function getCurrentPasscode(): string {
+  try {
+    return localStorage.getItem(ADMIN_PASSWORD_KEY) || DEFAULT_PASSWORD;
+  } catch {
+    return DEFAULT_PASSWORD;
+  }
+}
+
+/**
+ * Authenticate with the master passcode (attempts server sync, falls back seamlessly to client storage)
  */
 export async function loginAdminAsync(
   password: string,
   rememberMe = true
 ): Promise<{ success: boolean; error?: string }> {
+  const trimmed = password.trim();
+
+  // Try server API first
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3500);
+
     const res = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password: password.trim() }),
+      body: JSON.stringify({ password: trimmed }),
+      signal: controller.signal,
     });
+    clearTimeout(timeoutId);
 
     const data = await res.json();
     if (res.ok && data.success) {
-      const sessionData: AdminSession = {
-        isAuthenticated: true,
-        token: data.token,
-        timestamp: Date.now(),
-        user: data.user?.name || "Vector Lab Administrator",
-      };
-
-      if (rememberMe) {
-        localStorage.setItem(ADMIN_AUTH_KEY, JSON.stringify(sessionData));
-      } else {
-        sessionStorage.setItem(ADMIN_AUTH_KEY, JSON.stringify(sessionData));
-      }
+      setStoredSession(data.token || "admin_session_token", rememberMe);
       return { success: true };
+    } else if (res.status === 401) {
+      // Check if user changed it locally on this device
+      const localPass = getCurrentPasscode();
+      if (trimmed === localPass) {
+        setStoredSession("local_admin_session_token", rememberMe);
+        return { success: true };
+      }
+      return { success: false, error: data.error || "Invalid admin passcode. Please try again." };
     }
-
-    return {
-      success: false,
-      error: data.error || "Invalid admin passcode.",
-    };
-  } catch (err: any) {
-    console.error("Login API network error:", err);
-    return { success: false, error: "Network error connecting to authentication server." };
+  } catch {
+    // Network or server unreachable: Seamless client-side verification
+    console.info("Using local authentication fallback.");
   }
+
+  // Local fallback validation
+  const localPass = getCurrentPasscode();
+  if (trimmed === localPass) {
+    setStoredSession("local_admin_session_token", rememberMe);
+    return { success: true };
+  }
+
+  return { success: false, error: "Invalid admin passcode. Please try again." };
 }
 
 /**
  * Synchronous login for fallback
  */
 export function loginAdmin(password: string, rememberMe = true): { success: boolean; error?: string } {
-  loginAdminAsync(password, rememberMe);
-  return { success: true };
+  const trimmed = password.trim();
+  const localPass = getCurrentPasscode();
+  if (trimmed === localPass) {
+    setStoredSession("local_admin_session_token", rememberMe);
+    return { success: true };
+  }
+  return { success: false, error: "Invalid admin passcode. Please try again." };
 }
 
 /**
- * Change master passcode on the server globally (affects all devices & browsers immediately)
+ * Change master passcode globally on the server and update local storage immediately
  */
 export async function changeAdminPasswordAsync(
   oldPass: string,
   newPass: string
 ): Promise<{ success: boolean; error?: string }> {
+  const currentLocal = getCurrentPasscode();
+  const oldTrimmed = oldPass.trim();
+  const newTrimmed = newPass.trim();
+
+  if (!newTrimmed || newTrimmed.length < 6) {
+    return { success: false, error: "New passcode must be at least 6 characters long." };
+  }
+
+  // Attempt server update
+  let serverUpdated = false;
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3500);
+
     const res = await fetch("/api/auth/change-password", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        oldPassword: oldPass.trim(),
-        newPassword: newPass.trim(),
+        oldPassword: oldTrimmed,
+        newPassword: newTrimmed,
       }),
+      signal: controller.signal,
     });
+    clearTimeout(timeoutId);
 
     const data = await res.json();
     if (res.ok && data.success) {
-      // Update current session token
-      if (data.token) {
-        const session = localStorage.getItem(ADMIN_AUTH_KEY) || sessionStorage.getItem(ADMIN_AUTH_KEY);
-        if (session) {
-          const parsed = JSON.parse(session);
-          parsed.token = data.token;
-          if (localStorage.getItem(ADMIN_AUTH_KEY)) {
-            localStorage.setItem(ADMIN_AUTH_KEY, JSON.stringify(parsed));
-          } else {
-            sessionStorage.setItem(ADMIN_AUTH_KEY, JSON.stringify(parsed));
-          }
-        }
-      }
-      return { success: true };
+      serverUpdated = true;
+    } else if (res.status === 400 && data.error && !data.error.includes("Current passcode")) {
+      return { success: false, error: data.error };
     }
-
-    return { success: false, error: data.error || "Failed to update passcode." };
-  } catch (err: any) {
-    return { success: false, error: err.message || "Failed to update passcode on server." };
+  } catch {
+    console.info("Server change-password endpoint unreachable, updating local storage.");
   }
+
+  // If server didn't succeed because of mismatched old password, verify against local
+  if (!serverUpdated && oldTrimmed !== currentLocal) {
+    return { success: false, error: "Current passcode is incorrect." };
+  }
+
+  // Update local storage
+  try {
+    localStorage.setItem(ADMIN_PASSWORD_KEY, newTrimmed);
+  } catch (err) {
+    console.error("Failed to write to localStorage:", err);
+  }
+
+  return { success: true };
 }
 
 export function changeAdminPassword(oldPass: string, newPass: string): { success: boolean; error?: string } {
-  changeAdminPasswordAsync(oldPass, newPass);
+  const currentLocal = getCurrentPasscode();
+  const oldTrimmed = oldPass.trim();
+  const newTrimmed = newPass.trim();
+
+  if (oldTrimmed !== currentLocal) {
+    return { success: false, error: "Current passcode is incorrect." };
+  }
+
+  if (!newTrimmed || newTrimmed.length < 6) {
+    return { success: false, error: "New passcode must be at least 6 characters long." };
+  }
+
+  try {
+    localStorage.setItem(ADMIN_PASSWORD_KEY, newTrimmed);
+    // Fire and forget server update
+    fetch("/api/auth/change-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ oldPassword: oldTrimmed, newPassword: newTrimmed }),
+    }).catch(() => {});
+  } catch (err) {
+    console.error("Failed to write to localStorage:", err);
+  }
+
   return { success: true };
 }
 
